@@ -71,13 +71,20 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 
 /* Grid & tiles */
 .grid{padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--tile),1fr));gap:var(--gap);overflow:auto;transition:all .18s ease}
-.tile{position:relative;background:var(--tile-bg);color:var(--tile-text);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-height:140px;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background-color .25s ease,opacity .18s ease}
+.tile{position:relative;background:var(--tile-bg);color:var(--tile-text);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-height:160px;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background-color .25s ease,opacity .18s ease}
 .tile:hover{transform:translateY(-3px);border-color:var(--accent)}
 .tile.selected{outline:2px solid var(--accent);background:var(--accent-soft);transform:translateY(-4px);transition:transform .16s ease,outline-color .16s ease,background-color .2s ease}
-.thumb{width:100%;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;overflow:hidden;background:transparent}
+
+/* Thumb and preview text occupy same area; preview shown on hover */
+.contentArea{flex:1;position:relative;display:flex;align-items:center;justify-content:center;padding:12px;overflow:hidden}
+.thumb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:12px;transition:opacity .22s ease,transform .22s ease}
 .thumb img{width:100%;height:100%;object-fit:contain;background:transparent}
-.title{padding:8px 10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.text{padding:0 10px 12px 10px;color:var(--muted);font-size:13px;white-space:pre-wrap;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.previewText{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;color:var(--muted);font-size:13px;text-align:center;opacity:0;transform:translateY(6px);transition:opacity .22s ease,transform .22s ease}
+.tile:hover .thumb{opacity:0;transform:translateY(-6px)}
+.tile:hover .previewText{opacity:1;transform:translateY(0)}
+
+/* Title anchored to bottom, centered horizontally, equal side padding */
+.title{padding:10px 12px;text-align:center;font-weight:600;margin-top:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* tile entrance animation */
 .tile { animation: tileIn .22s ease both; }
@@ -189,13 +196,13 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 <div id="modalImport" class="modalWrap" aria-hidden="true">
   <div class="modal" role="dialog">
     <h3>Імпорт шаблонів</h3>
-    <div class="note">Оберіть спосіб імпорту. Excel: A=Title, B=Category, C=Text, D=Tags, E=Image. CSV/Google Sheets: A=Title, B=Text, C=Tags, D=Emoji, E=Image, F=Category.</div>
+    <div class="note">Оберіть спосіб імпорту. Excel: <strong>A=Category, B=Title, C=Text, D=Tags, E=Image</strong>. CSV/Google Sheets: <strong>A=Title, B=Text, C=Tags, D=Emoji, E=Image, F=Category</strong>.</div>
 
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">
       <div style="flex:1;min-width:280px">
         <div class="small" style="margin-bottom:6px">Файл (JSON/XLSX)</div>
         <input id="importFile" type="file" accept=".json,.xlsx,.xls" />
-        <div style="margin-top:8px"><button id="btnImportFile" class="btn">Імпортувати файл (Excel A→Title,B→Category,C→Text,D→Tags,E→Image)</button></div>
+        <div style="margin-top:8px"><button id="btnImportFile" class="btn">Імпортувати файл (Excel A→Category,B→Title,C→Text,D→Tags,E→Image)</button></div>
       </div>
 
       <div style="flex:1;min-width:280px">
@@ -341,6 +348,9 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
     tile.className = 'tile';
     tile.dataset.id = t.id;
 
+    const content = document.createElement('div');
+    content.className = 'contentArea';
+
     const thumb = document.createElement('div');
     thumb.className = 'thumb';
     if(t.image){
@@ -350,19 +360,24 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
       img.addEventListener('click', (e)=>{ e.stopPropagation(); copyAndCount(t.id); });
       thumb.appendChild(img);
     } else {
-      thumb.textContent = t.emoji || (t.title ? t.title.slice(0,1).toUpperCase() : 'T');
+      const span = document.createElement('div');
+      span.style.fontSize = '36px';
+      span.textContent = t.emoji || (t.title ? t.title.slice(0,1).toUpperCase() : 'T');
+      thumb.appendChild(span);
     }
-    tile.appendChild(thumb);
+
+    const preview = document.createElement('div');
+    preview.className = 'previewText';
+    preview.textContent = t.text || '';
+
+    content.appendChild(thumb);
+    content.appendChild(preview);
+    tile.appendChild(content);
 
     const title = document.createElement('div');
     title.className = 'title';
     title.textContent = t.title || 'Без назви';
     tile.appendChild(title);
-
-    const text = document.createElement('div');
-    text.className = 'text';
-    text.textContent = t.text || '';
-    tile.appendChild(text);
 
     tile.addEventListener('click', (ev)=>{
       const list = filtered();
@@ -391,7 +406,7 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
     return tile;
   }
 
-  // remove empty templates
+  // remove empty templates permanently
   function removeEmptyTemplates(){
     const before = templates.length;
     templates = templates.filter(t => (t.title && t.title.trim()) || (t.text && t.text.trim()));
@@ -406,7 +421,6 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
     grid.innerHTML = '';
     const list = filtered();
 
-    // If no real templates, do not add placeholders
     if(list.length === 0){
       initSortableTemplates();
       renderCategories();
@@ -414,44 +428,18 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
       return;
     }
 
-    // append tiles with slight stagger to feel smooth but light
     list.forEach((t, i) => {
       const tile = buildTile(t);
       tile.style.animationDelay = (i * 12) + 'ms';
       grid.appendChild(tile);
     });
 
-    fillPlaceholders();
     syncSelectionUI();
     initSortableTemplates();
     renderCategories();
   }
 
-  function fillPlaceholders(){
-    const grid = $('grid');
-    if(!grid) return;
-    Array.from(grid.querySelectorAll('.tile.placeholder')).forEach(n=>n.remove());
-    const realTiles = Array.from(grid.children).filter(ch => ch.classList && ch.classList.contains('tile') && ch.dataset && ch.dataset.id);
-    const realCount = realTiles.length;
-    if(realCount === 0) return;
-    const tileW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tile')) || 220;
-    const gap = parseInt(getComputedStyle(grid).getPropertyValue('gap')) || 12;
-    const cols = Math.max(1, Math.floor((grid.clientWidth + gap) / (tileW + gap)));
-    if(cols <= 1) return;
-    const rem = realCount % cols;
-    if(rem === 0) return;
-    const need = cols - rem;
-    for(let i=0;i<need;i++){
-      const ph = document.createElement('div');
-      ph.className = 'tile placeholder';
-      ph.setAttribute('aria-hidden','true');
-      ph.draggable = false;
-      ph.innerHTML = '<div class="thumb"></div><div class="title" style="opacity:.35">Пусто</div>';
-      grid.appendChild(ph);
-    }
-  }
-
-  // sortable templates (exclude placeholders)
+  // sortable templates
   let sortableTemplates = null;
   function initSortableTemplates(){
     const grid = $('grid');
@@ -464,11 +452,6 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
     sortableTemplates = Sortable.create(grid, {
       animation: 150,
       handle: '.tile',
-      filter: '.placeholder',
-      onMove: function(evt){
-        if(evt.related && evt.related.classList && evt.related.classList.contains('placeholder')) return false;
-        return true;
-      },
       onEnd: (evt) => {
         const ids = Array.from(grid.children).map(ch => ch.dataset && ch.dataset.id ? ch.dataset.id : null).filter(Boolean);
         const newTemplates = [];
@@ -599,7 +582,7 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   // import helpers
   function autoFix(text){ if(!text) return ''; return String(text).replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim(); }
 
-  // hidden input handler for XLSX/JSON (Excel mapping A=Title,B=Category,C=Text,D=Tags,E=Image)
+  // hidden input handler for XLSX/JSON (STRICT Excel mapping: A=Category, B=Title, C=Text, D=Tags, E=Image)
   safeOn($('xlsxImport'), 'change', (e)=>{
     const file = e.target.files && e.target.files[0];
     if(!file) return;
@@ -625,16 +608,15 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
         wb.SheetNames.forEach(sheetName => {
           const ws = wb.Sheets[sheetName];
           const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
-          // detect header row
+          // Strict mapping: A=Category, B=Title, C=Text, D=Tags, E=Image
           let startIndex = 0;
           const firstRow = (rows[0] || []).map(c => String(c||'').toLowerCase());
-          if(firstRow.some(h => ['title','category','text','tags','image'].includes(h))) startIndex = 1;
+          if(firstRow.some(h => ['category','title','text','tags','image'].includes(h))) startIndex = 1;
           const templatesFromSheet = [];
           for(let r = startIndex; r < rows.length; r++){
             const row = rows[r] || [];
-            // Excel mapping required: A=Title, B=Category, C=Text, D=Tags, E=Image URL
-            const title = (row[0]||'').toString().trim();
-            const category = (row[1]||'').toString().trim() || sheetName || 'Без категорії';
+            const category = (row[0]||'').toString().trim() || sheetName || 'Без категорії';
+            const title = (row[1]||'').toString().trim();
             const text = (row[2]||'').toString().trim();
             const tagsRaw = (row[3]||'').toString().trim();
             const image = (row[4]||'').toString().trim();
@@ -661,7 +643,7 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
             if(!exists) templates.push(shaped);
           });
         });
-        persist(); renderTemplates(); toast('Excel імпортовано (A=Title,B=Category,C=Text,D=Tags,E=Image)');
+        persist(); renderTemplates(); toast('Excel імпортовано (A=Category,B=Title,C=Text,D=Tags,E=Image)');
       }catch(err){ console.error('XLSX import error', err); alert('Помилка імпорту XLSX'); }
     };
     reader.readAsArrayBuffer(file);
@@ -683,7 +665,6 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
       const mapped = [];
       for(let r = startIndex; r < rows.length; r++){
         const row = rows[r] || [];
-        // Google Sheets CSV mapping: A=Title, B=Text, C=Tags, D=Emoji, E=Image, F=Category
         const title = (row[0]||'').toString().trim();
         const text = (row[1]||'').toString().trim();
         const tagsRaw = (row[2]||'').toString().trim();
@@ -717,7 +698,6 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
       const sheetName = sheet.properties && sheet.properties.title ? String(sheet.properties.title) : 'Лист';
       const rows = (sheet.data && sheet.data[0] && sheet.data[0].rowData) ? sheet.data[0].rowData : [];
       if(rows.length < 1) continue;
-      // detect header row
       let startIndex = 0;
       const headerCells = (rows[0].values || []).map(c => (c && c.formattedValue) ? String(c.formattedValue).toLowerCase() : '');
       if(headerCells.some(h => ['title','text','tags','emoji','image','category'].includes(h))) startIndex = 1;
@@ -858,7 +838,7 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
       const saved = localStorage.getItem(UI_TILE_KEY);
       if(saved) zoomRange.value = (parseInt(saved)/base).toFixed(2);
       else zoomRange.value = 1;
-      zoomRange.addEventListener('input', (e)=>{ const base=220; let w=Math.round(base * parseFloat(e.target.value)); const min=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tile-min'))||160; const max=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tile-max'))||360; if(w<min) w=min; if(w>max) w=max; document.documentElement.style.setProperty('--tile', w+'px'); localStorage.setItem(UI_TILE_KEY, String(w)); setTimeout(()=>fillPlaceholders(),120); });
+      zoomRange.addEventListener('input', (e)=>{ const base=220; let w=Math.round(base * parseFloat(e.target.value)); const min=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tile-min'))||160; const max=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tile-max'))||360; if(w<min) w=min; if(w>max) w=max; document.documentElement.style.setProperty('--tile', w+'px'); localStorage.setItem(UI_TILE_KEY, String(w)); setTimeout(()=>renderTemplates(),120); });
     }
 
     // restore bg
