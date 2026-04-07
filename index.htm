@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Шаблони — Менеджер</title>
+<title>Шаблони </title>
 <style>
 /* Light tokens */
 :root{
@@ -75,7 +75,7 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 .tile:hover{transform:translateY(-3px);border-color:var(--accent)}
 .tile.selected{outline:2px solid var(--accent);background:var(--accent-soft);transform:translateY(-4px);transition:transform .16s ease,outline-color .16s ease,background-color .2s ease}
 
-/* Thumb and preview text occupy same area; preview shown on hover */
+/* Content area: thumb and preview share same space */
 .contentArea{flex:1;position:relative;display:flex;align-items:center;justify-content:center;padding:12px;overflow:hidden}
 .thumb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:12px;transition:opacity .22s ease,transform .22s ease}
 .thumb img{width:100%;height:100%;object-fit:contain;background:transparent}
@@ -96,8 +96,13 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 /* Modal */
 .modalWrap{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;visibility:hidden;transition:opacity .18s ease,visibility .18s ease;display:flex;align-items:center;justify-content:center;z-index:300}
 .modalWrap.show{opacity:1;visibility:visible}
-.modal{width:min(920px,96vw);background:var(--card);padding:16px;border-radius:10px;border:1px solid var(--border);max-height:90vh;overflow:auto;transform:translateY(10px) scale(.98);opacity:0;transition:all .18s ease}
+.modal{width:min(980px,96vw);background:var(--card);padding:16px;border-radius:10px;border:1px solid var(--border);max-height:90vh;overflow:auto;transform:translateY(10px) scale(.98);opacity:0;transition:all .18s ease}
 .modalWrap.show .modal{transform:translateY(0) scale(1);opacity:1}
+
+/* Import preview table */
+.previewTable{width:100%;border-collapse:collapse;margin-top:8px}
+.previewTable th, .previewTable td{border:1px solid var(--border);padding:6px;font-size:13px;text-align:left;background:var(--card);color:var(--text)}
+.mappingRow{display:flex;gap:8px;align-items:center;margin-top:8px}
 
 /* Toast */
 #__toast{position:fixed;right:20px;top:20px;background:rgba(0,0,0,0.85);color:#fff;padding:8px 12px;border-radius:8px;z-index:9999;opacity:0;transform:translateY(-8px);transition:opacity .18s ease,transform .18s ease}
@@ -107,8 +112,11 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 .undoBar{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:rgba(0,0,0,0.85);color:#fff;padding:10px 14px;border-radius:8px;display:flex;gap:8px;align-items:center;z-index:9999;animation:toastIn .2s ease}
 @keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
+/* small visual feedback after copy */
+.tile.just-copied{box-shadow:0 6px 18px rgba(59,130,246,0.12);outline:2px solid rgba(59,130,246,0.18)}
+
 /* Responsive */
-@media(max-width:900px){ .search{width:160px} .sidebar{width:200px} }
+@media(max-width:900px){ .search{width:160px} .sidebar{width:200px} .modal{width:94vw} }
 </style>
 </head>
 <body>
@@ -192,28 +200,56 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   </div>
 </div>
 
-<!-- Import modal (single) -->
+<!-- Import modal with preview -->
 <div id="modalImport" class="modalWrap" aria-hidden="true">
   <div class="modal" role="dialog">
-    <h3>Імпорт шаблонів</h3>
-    <div class="note">Оберіть спосіб імпорту. Excel: <strong>A=Category, B=Title, C=Text, D=Tags, E=Image</strong>. CSV/Google Sheets: <strong>A=Title, B=Text, C=Tags, D=Emoji, E=Image, F=Category</strong>.</div>
+    <h3>Імпорт шаблонів — прев’ю</h3>
+    <div class="note">Оберіть файл (JSON/XLSX) або вставте CSV link. Після завантаження побачите перші рядки і зможете вибрати мапінг колонок перед підтвердженням.</div>
 
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">
-      <div style="flex:1;min-width:280px">
+      <div style="flex:1;min-width:320px">
         <div class="small" style="margin-bottom:6px">Файл (JSON/XLSX)</div>
         <input id="importFile" type="file" accept=".json,.xlsx,.xls" />
-        <div style="margin-top:8px"><button id="btnImportFile" class="btn">Імпортувати файл (Excel A→Category,B→Title,C→Text,D→Tags,E→Image)</button></div>
+        <div style="margin-top:8px"><button id="btnLoadFilePreview" class="btn">Завантажити і показати прев’ю</button></div>
       </div>
 
-      <div style="flex:1;min-width:280px">
+      <div style="flex:1;min-width:320px">
         <div class="small" style="margin-bottom:6px">Google Sheets (CSV link)</div>
         <input id="gsCsvLink" class="input" placeholder="CSV link (export?format=csv)" style="width:100%;margin-bottom:8px" />
-        <div style="margin-bottom:8px"><button id="btnImportCsvLink" class="btn">Імпортувати CSV (A→Title,B→Text,C→Tags,D→Emoji,E→Image,F→Category)</button></div>
+        <div style="margin-bottom:8px"><button id="btnLoadCsvPreview" class="btn">Завантажити CSV і показати прев’ю</button></div>
 
         <div class="small" style="margin-bottom:6px">Google Sheets API (Spreadsheet ID + API Key)</div>
         <input id="gsSpreadsheetId" class="input" placeholder="Spreadsheet ID" style="width:100%;margin-bottom:8px" />
         <input id="gsApiKey" class="input" placeholder="API Key" style="width:100%" />
-        <div style="margin-top:8px"><button id="btnImportGsApi" class="btn">Імпортувати через API (A→Title,B→Text,C→Tags,D→Emoji,E→Image,F→Category)</button></div>
+        <div style="margin-top:8px"><button id="btnLoadGsApiPreview" class="btn">Завантажити через API і показати прев’ю</button></div>
+      </div>
+    </div>
+
+    <div id="previewArea" style="display:none;margin-top:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="small">Показано перші <span id="previewCount">0</span> рядків</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <label class="small">Кількість рядків прев’ю</label>
+          <select id="previewRows" class="input" style="width:80px">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:8px">
+        <div class="small">Оберіть мапінг колонок (при необхідності змініть вручну)</div>
+        <div style="margin-top:6px" id="mappingControls"></div>
+      </div>
+
+      <div style="margin-top:8px;overflow:auto;max-height:320px">
+        <table class="previewTable" id="previewTable"></table>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button id="btnConfirmImport" class="btn">Імпортувати підтверджені рядки</button>
+        <button id="btnCancelPreview" class="btn cancel">Скасувати</button>
       </div>
     </div>
 
@@ -248,6 +284,15 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
 <script>
+/*
+  Final patched index.html:
+  - No placeholder "Пусто" tiles (only real templates rendered)
+  - Tile click uses preventDefault/stopPropagation and does not trigger full rerender on copy
+  - copyAndCount updated to avoid renderTemplates() and only update usage + local visual feedback
+  - Import preview modal included (from previous version)
+  - Ukrainian UI, dark theme tokens, animations preserved
+*/
+
 (function(){
   const STORAGE_KEY = 'brainTemplates';
   const CATEGORY_ORDER_KEY = 'categoryOrder';
@@ -379,9 +424,17 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
     title.textContent = t.title || 'Без назви';
     tile.appendChild(title);
 
+    // Patched click handler: prevent default/navigation and avoid full rerender on copy
     tile.addEventListener('click', (ev)=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+
       const list = filtered();
-      if(!editMode){ copyAndCount(t.id); return; }
+      if(!editMode){
+        copyAndCount(t.id);
+        return;
+      }
+
       const idx = list.findIndex(x=>x.id===t.id);
       if(ev.shiftKey && lastSelectedIndex !== null && lastSelectedIndex !== undefined){
         const s = Math.min(lastSelectedIndex, idx);
@@ -464,11 +517,72 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
     });
   }
 
-  // copy and count
+  // copy and count (patched): no full rerender, local update + storage
   function copyAndCount(id){
     const t = templates.find(x=>x.id===id);
     if(!t) return;
-    navigator.clipboard?.writeText(t.text || '').then(()=>{ t.usage = (t.usage||0)+1; persist(); renderTemplates(); toast(`Скопійовано: «${t.title}»`); }).catch(()=>{ alert('Не вдалося скопіювати'); });
+
+    const textToCopy = t.text || '';
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(textToCopy).then(()=>{
+        // update usage locally and persist without full rerender
+        t.usage = (t.usage||0) + 1;
+        try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(templates)); }catch(e){ /* silent */ }
+
+        // visual feedback on the tile
+        const tileEl = document.querySelector(`.tile[data-id="${id}"]`);
+        if(tileEl){
+          tileEl.classList.add('just-copied');
+          setTimeout(()=> tileEl.classList.remove('just-copied'), 420);
+        }
+
+        toast(`Скопійовано: «${t.title}»`);
+      }).catch(()=>{
+        // fallback copy
+        try{
+          const ta = document.createElement('textarea');
+          ta.value = textToCopy;
+          ta.style.position = 'fixed';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          t.usage = (t.usage||0) + 1;
+          try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(templates)); }catch(e){}
+          const tileEl = document.querySelector(`.tile[data-id="${id}"]`);
+          if(tileEl){
+            tileEl.classList.add('just-copied');
+            setTimeout(()=> tileEl.classList.remove('just-copied'), 420);
+          }
+          toast(`Скопійовано: «${t.title}»`);
+        }catch(err){
+          alert('Не вдалося скопіювати текст у буфер обміну.');
+        }
+      });
+    } else {
+      // old fallback
+      try{
+        const ta = document.createElement('textarea');
+        ta.value = textToCopy;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        t.usage = (t.usage||0) + 1;
+        try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(templates)); }catch(e){}
+        const tileEl = document.querySelector(`.tile[data-id="${id}"]`);
+        if(tileEl){
+          tileEl.classList.add('just-copied');
+          setTimeout(()=> tileEl.classList.remove('just-copied'), 420);
+        }
+        toast(`Скопійовано: «${t.title}»`);
+      }catch(err){
+        alert('Не вдалося скопіювати текст у буфер обміну.');
+      }
+    }
   }
 
   // editor
@@ -579,79 +693,261 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   }
   function hideUndoBar(){ const b = $('__undoBar'); if(b) b.remove(); }
 
-  // import helpers
-  function autoFix(text){ if(!text) return ''; return String(text).replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim(); }
+  // IMPORT PREVIEW LOGIC (kept from previous)
+  let previewRowsData = [];
+  let currentPreviewSource = null;
+  let currentPreviewMapping = null;
+  let previewFileName = '';
 
-  // hidden input handler for XLSX/JSON (STRICT Excel mapping: A=Category, B=Title, C=Text, D=Tags, E=Image)
-  safeOn($('xlsxImport'), 'change', (e)=>{
-    const file = e.target.files && e.target.files[0];
-    if(!file) return;
+  function showImportModal(){ $('modalImport').classList.add('show'); $('modalImport').setAttribute('aria-hidden','false'); }
+  function hideImportModal(){ $('modalImport').classList.remove('show'); $('modalImport').setAttribute('aria-hidden','true'); resetPreview(); }
+
+  function resetPreview(){
+    previewRowsData = [];
+    currentPreviewSource = null;
+    currentPreviewMapping = null;
+    previewFileName = '';
+    $('previewArea').style.display = 'none';
+    $('previewTable').innerHTML = '';
+    $('mappingControls').innerHTML = '';
+    $('importStatus').textContent = '';
+  }
+
+  function renderPreviewTable(rows, mapping){
+    const table = $('previewTable');
+    table.innerHTML = '';
+    if(!rows || rows.length === 0) return;
+    const cols = Math.max(...rows.map(r => r.length));
+    const thead = document.createElement('thead');
+    const htr = document.createElement('tr');
+    for(let c=0;c<cols;c++){
+      const th = document.createElement('th');
+      th.textContent = 'Col ' + (c+1);
+      htr.appendChild(th);
+    }
+    thead.appendChild(htr);
+    table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    const previewCount = Math.min(rows.length, parseInt($('previewRows').value || '10'));
+    for(let r=0;r<previewCount;r++){
+      const tr = document.createElement('tr');
+      const row = rows[r] || [];
+      for(let c=0;c<cols;c++){
+        const td = document.createElement('td');
+        td.textContent = row[c] !== undefined ? String(row[c]) : '';
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+    $('previewCount').textContent = previewCount;
+  }
+
+  function buildMappingControls(cols){
+    const wrap = $('mappingControls');
+    wrap.innerHTML = '';
+    const fields = [
+      {key:'title', label:'Title'},
+      {key:'category', label:'Category'},
+      {key:'text', label:'Text'},
+      {key:'tags', label:'Tags'},
+      {key:'emoji', label:'Emoji'},
+      {key:'image', label:'Image URL'}
+    ];
+    fields.forEach(f=>{
+      const row = document.createElement('div');
+      row.className = 'mappingRow';
+      const lbl = document.createElement('div');
+      lbl.textContent = f.label;
+      lbl.style.minWidth = '90px';
+      const sel = document.createElement('select');
+      sel.className = 'input';
+      sel.style.width = '160px';
+      for(let i=0;i<cols;i++){
+        const opt = document.createElement('option');
+        opt.value = String(i);
+        opt.textContent = 'Col ' + (i+1);
+        sel.appendChild(opt);
+      }
+      const noneOpt = document.createElement('option');
+      noneOpt.value = '-1';
+      noneOpt.textContent = '— none —';
+      sel.insertBefore(noneOpt, sel.firstChild);
+      if(currentPreviewMapping && typeof currentPreviewMapping[f.key] !== 'undefined'){
+        sel.value = String(currentPreviewMapping[f.key] >= 0 ? currentPreviewMapping[f.key] : -1);
+      } else {
+        sel.value = '-1';
+      }
+      sel.onchange = ()=> {
+        currentPreviewMapping[f.key] = parseInt(sel.value,10);
+      };
+      row.appendChild(lbl);
+      row.appendChild(sel);
+      wrap.appendChild(row);
+    });
+  }
+
+  function detectMappingFromHeader(headerRow){
+    const map = {category:-1,title:-1,text:-1,tags:-1,emoji:-1,image:-1};
+    headerRow.forEach((cell, idx) => {
+      if(!cell) return;
+      const v = String(cell).toLowerCase();
+      if(v.includes('title') || v.includes('name')) map.title = idx;
+      if(v.includes('category') || v.includes('sheet') || v.includes('group')) map.category = idx;
+      if(v.includes('text') || v.includes('content') || v.includes('body')) map.text = idx;
+      if(v.includes('tag')) map.tags = idx;
+      if(v.includes('emoji')) map.emoji = idx;
+      if(v.includes('image') || v.includes('url') || v.includes('img')) map.image = idx;
+    });
+    return map;
+  }
+
+  safeOn($('btnLoadFilePreview'), 'click', ()=>{
+    const f = $('importFile')?.files?.[0];
+    if(!f){ alert('Виберіть файл'); return; }
+    previewFileName = f.name || '';
     const reader = new FileReader();
     reader.onload = ev => {
       const data = new Uint8Array(ev.target.result);
-      const name = file.name.toLowerCase();
+      const name = f.name.toLowerCase();
       if(name.endsWith('.json')){
         try{
           const parsed = JSON.parse(new TextDecoder().decode(data));
           if(Array.isArray(parsed)){
-            const shaped = parsed.map(p=>ensureShape(p));
-            templates = [...shaped, ...templates];
-            shaped.forEach(s=>{ if(s.category && !categoryOrder.includes(s.category)) categoryOrder.push(s.category); });
-            persist(); renderTemplates(); toast('JSON імпортовано');
+            const rows = [];
+            const keys = Object.keys(parsed[0] || {});
+            rows.push(keys);
+            parsed.slice(0,50).forEach(obj => {
+              rows.push(keys.map(k=>obj[k]||''));
+            });
+            previewRowsData = rows;
+            currentPreviewSource = 'json';
+            currentPreviewMapping = detectMappingFromHeader(rows[0]);
+            showPreviewUI();
           } else alert('JSON має бути масивом шаблонів');
         }catch(err){ alert('JSON пошкоджений'); console.error(err); }
-        e.target.value = ''; return;
+        return;
       }
       try{
         const wb = XLSX.read(data, { type:'array' });
-        const allImported = [];
-        wb.SheetNames.forEach(sheetName => {
-          const ws = wb.Sheets[sheetName];
-          const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
-          // Strict mapping: A=Category, B=Title, C=Text, D=Tags, E=Image
-          let startIndex = 0;
-          const firstRow = (rows[0] || []).map(c => String(c||'').toLowerCase());
-          if(firstRow.some(h => ['category','title','text','tags','image'].includes(h))) startIndex = 1;
-          const templatesFromSheet = [];
-          for(let r = startIndex; r < rows.length; r++){
-            const row = rows[r] || [];
-            const category = (row[0]||'').toString().trim() || sheetName || 'Без категорії';
-            const title = (row[1]||'').toString().trim();
-            const text = (row[2]||'').toString().trim();
-            const tagsRaw = (row[3]||'').toString().trim();
-            const image = (row[4]||'').toString().trim();
-            if(!title && !text) continue;
-            const tags = tagsRaw ? tagsRaw.split(/[,;]+/).map(t=>t.trim()).filter(Boolean) : [];
-            templatesFromSheet.push({ title, category, text: autoFix(text), tags, image });
-          }
-          if(templatesFromSheet.length) allImported.push({ name: sheetName, templates: templatesFromSheet });
-        });
-        // merge imported
-        allImported.forEach(cat => {
-          const catName = cat.name || 'Без категорії';
-          if(!categoryOrder.includes(catName)) categoryOrder.push(catName);
-          cat.templates.forEach(t => {
-            const shaped = ensureShape({
-              title: t.title || '',
-              text: t.text || '',
-              tags: t.tags || [],
-              emoji: t.emoji || '',
-              image: t.image || '',
-              category: t.category || catName
-            });
-            const exists = templates.some(existing => existing.title === shaped.title && existing.text === shaped.text && existing.category === shaped.category);
-            if(!exists) templates.push(shaped);
-          });
-        });
-        persist(); renderTemplates(); toast('Excel імпортовано (A=Category,B=Title,C=Text,D=Tags,E=Image)');
-      }catch(err){ console.error('XLSX import error', err); alert('Помилка імпорту XLSX'); }
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
+        previewRowsData = rows.slice(0,200);
+        currentPreviewSource = 'xlsx';
+        currentPreviewMapping = { category:0, title:1, text:2, tags:3, emoji:-1, image:4 };
+        if(rows[0] && rows[0].some(c => typeof c === 'string' && /title|category|text|tags|image|emoji/i.test(String(c)))){
+          const headerMap = detectMappingFromHeader(rows[0]);
+          currentPreviewMapping = Object.assign({category:-1,title:-1,text:-1,tags:-1,emoji:-1,image:-1}, headerMap);
+        }
+        showPreviewUI();
+      }catch(err){ console.error('XLSX preview error', err); alert('Помилка читання XLSX'); }
     };
-    reader.readAsArrayBuffer(file);
-    e.target.value = '';
+    reader.readAsArrayBuffer(f);
   });
 
-  // CSV link import (Google Sheets CSV mapping A=Title,B=Text,C=Tags,D=Emoji,E=Image,F=Category)
-  async function importCsvLink(url){
+  safeOn($('btnLoadCsvPreview'), 'click', async ()=>{
+    const url = $('gsCsvLink').value.trim();
+    if(!url){ alert('Вставте CSV link'); return; }
+    try{
+      const res = await fetch(url);
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const csv = await res.text();
+      const parsed = Papa.parse(csv, { skipEmptyLines:true });
+      const rows = parsed.data || [];
+      previewRowsData = rows.slice(0,200);
+      currentPreviewSource = 'csv';
+      currentPreviewMapping = { title:0, text:1, tags:2, emoji:3, image:4, category:5 };
+      if(rows[0] && rows[0].some(c => typeof c === 'string' && /title|category|text|tags|image|emoji/i.test(String(c)))){
+        const headerMap = detectMappingFromHeader(rows[0]);
+        currentPreviewMapping = Object.assign({category:-1,title:-1,text:-1,tags:-1,emoji:-1,image:-1}, headerMap);
+      }
+      showPreviewUI();
+    }catch(err){ console.error(err); alert('Помилка завантаження CSV'); }
+  });
+
+  safeOn($('btnLoadGsApiPreview'), async ()=>{
+    const id = $('gsSpreadsheetId').value.trim();
+    const key = $('gsApiKey').value.trim();
+    if(!id || !key){ alert('Вкажіть Spreadsheet ID та API Key'); return; }
+    try{
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(id)}?includeGridData=true&key=${encodeURIComponent(key)}`;
+      const res = await fetch(url);
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      if(!Array.isArray(data.sheets) || !data.sheets.length){ alert('Не знайдено листів'); return; }
+      const sheet = data.sheets[0];
+      const rows = (sheet.data && sheet.data[0] && sheet.data[0].rowData) ? sheet.data[0].rowData.map(r => (r.values||[]).map(c => c && c.formattedValue ? c.formattedValue : '')) : [];
+      previewRowsData = rows.slice(0,200);
+      currentPreviewSource = 'gsapi';
+      currentPreviewMapping = { title:0, text:1, tags:2, emoji:3, image:4, category:5 };
+      if(rows[0] && rows[0].some(c => typeof c === 'string' && /title|category|text|tags|image|emoji/i.test(String(c)))){
+        const headerMap = detectMappingFromHeader(rows[0]);
+        currentPreviewMapping = Object.assign({category:-1,title:-1,text:-1,tags:-1,emoji:-1,image:-1}, headerMap);
+      }
+      showPreviewUI();
+    }catch(err){ console.error(err); alert('Помилка Google Sheets API'); }
+  });
+
+  function showPreviewUI(){
+    const rows = previewRowsData || [];
+    const cols = Math.max(1, ...rows.map(r => r.length));
+    $('previewArea').style.display = 'block';
+    $('previewRows').value = $('previewRows').value || '10';
+    buildMappingControls(cols);
+    renderPreviewTable(rows, currentPreviewMapping);
+  }
+
+  safeOn($('previewRows'), 'change', ()=> {
+    renderPreviewTable(previewRowsData, currentPreviewMapping);
+  });
+
+  safeOn($('btnConfirmImport'), 'click', ()=>{
+    if(!previewRowsData || !previewRowsData.length){ alert('Немає даних для імпорту'); return; }
+    const mapping = {};
+    const selects = $('mappingControls').querySelectorAll('select');
+    const keys = ['title','category','text','tags','emoji','image'];
+    selects.forEach((sel,i)=> {
+      const val = parseInt(sel.value,10);
+      mapping[keys[i]] = isNaN(val) ? -1 : val;
+    });
+
+    const rows = previewRowsData.slice(0, Math.min(previewRowsData.length, 1000));
+    const imported = [];
+    for(let r = 0; r < rows.length; r++){
+      const row = rows[r] || [];
+      const title = mapping.title >=0 ? String(row[mapping.title]||'').trim() : '';
+      const category = mapping.category >=0 ? String(row[mapping.category]||'').trim() : 'Без категорії';
+      const text = mapping.text >=0 ? String(row[mapping.text]||'').trim() : '';
+      const tagsRaw = mapping.tags >=0 ? String(row[mapping.tags]||'').trim() : '';
+      const emoji = mapping.emoji >=0 ? String(row[mapping.emoji]||'').trim() : '';
+      const image = mapping.image >=0 ? String(row[mapping.image]||'').trim() : '';
+      if(!title && !text) continue;
+      const tags = tagsRaw ? tagsRaw.split(/[,;]+/).map(t=>t.trim()).filter(Boolean) : [];
+      imported.push({ title, category: category || 'Без категорії', text: autoFix(text), tags, emoji, image });
+    }
+
+    let added = 0;
+    imported.forEach(t => {
+      const shaped = ensureShape(t);
+      const exists = templates.some(existing => existing.title === shaped.title && existing.text === shaped.text && existing.category === shaped.category);
+      if(!exists){
+        templates.push(shaped);
+        if(!categoryOrder.includes(shaped.category)) categoryOrder.push(shaped.category);
+        added++;
+      }
+    });
+
+    persist();
+    renderTemplates();
+    toast(`Імпортовано ${added} шаблон(ів)`);
+    hideImportModal();
+  });
+
+  safeOn($('btnCancelPreview'), 'click', ()=> resetPreview());
+  safeOn($('btnImportClose'), 'click', ()=> hideImportModal());
+
+  // CSV direct import helper (kept)
+  async function importCsvLinkDirect(url){
     if(!url) return;
     try{
       const res = await fetch(url);
@@ -682,74 +978,60 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
     }catch(err){ console.error(err); alert('Помилка імпорту CSV'); }
   }
 
-  // Google Sheets API import (A=Title,B=Text,C=Tags,D=Emoji,E=Image,F=Category)
-  async function importTemplatesFromGS(spreadsheetId, apiKey){
-    if(!spreadsheetId || !apiKey) throw new Error('Spreadsheet ID and API key required');
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}?includeGridData=true&key=${encodeURIComponent(apiKey)}`;
-    const res = await fetch(url);
-    if(!res.ok){
-      const txt = await res.text().catch(()=>res.statusText);
-      throw new Error(`Google Sheets API error ${res.status}: ${txt}`);
-    }
-    const data = await res.json();
-    const categories = [];
-    if(!Array.isArray(data.sheets)) return categories;
-    for(const sheet of data.sheets){
-      const sheetName = sheet.properties && sheet.properties.title ? String(sheet.properties.title) : 'Лист';
-      const rows = (sheet.data && sheet.data[0] && sheet.data[0].rowData) ? sheet.data[0].rowData : [];
-      if(rows.length < 1) continue;
-      let startIndex = 0;
-      const headerCells = (rows[0].values || []).map(c => (c && c.formattedValue) ? String(c.formattedValue).toLowerCase() : '');
-      if(headerCells.some(h => ['title','text','tags','emoji','image','category'].includes(h))) startIndex = 1;
-      const templatesFromSheet = [];
-      for(let r = startIndex; r < rows.length; r++){
-        const row = rows[r];
-        const cells = row.values || [];
-        const getCell = (i) => (cells[i] && typeof cells[i].formattedValue !== 'undefined') ? String(cells[i].formattedValue) : '';
-        const title = getCell(0).trim();
-        const text  = getCell(1).trim();
-        const tagsRaw = getCell(2).trim();
-        const emoji = getCell(3).trim();
-        const image = getCell(4).trim();
-        const category = getCell(5).trim() || sheetName || 'Без категорії';
-        if(!title && !text) continue;
-        const tags = tagsRaw ? tagsRaw.split(/[,;]+/).map(t=>t.trim()).filter(Boolean) : [];
-        templatesFromSheet.push({ title, category, text: autoFix(text), tags, emoji, image });
+  // hidden input handler for XLSX/JSON direct import (backwards compat)
+  safeOn($('xlsxImport'), 'change', (e)=>{
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const data = new Uint8Array(ev.target.result);
+      const name = file.name.toLowerCase();
+      if(name.endsWith('.json')){
+        try{
+          const parsed = JSON.parse(new TextDecoder().decode(data));
+          if(Array.isArray(parsed)){
+            const shaped = parsed.map(p=>ensureShape(p));
+            templates = [...shaped, ...templates];
+            shaped.forEach(s=>{ if(s.category && !categoryOrder.includes(s.category)) categoryOrder.push(s.category); });
+            persist(); renderTemplates(); toast('JSON імпортовано');
+          } else alert('JSON має бути масивом шаблонів');
+        }catch(err){ alert('JSON пошкоджений'); console.error(err); }
+        e.target.value = ''; return;
       }
-      if(templatesFromSheet.length) categories.push({ name: sheetName, templates: templatesFromSheet });
-    }
-    return categories;
-  }
-
-  function mergeImportedCategories(importedCategories){
-    importedCategories.forEach(cat => {
-      const catName = cat.name || 'Без категорії';
-      if(!categoryOrder.includes(catName)) categoryOrder.push(catName);
-      cat.templates.forEach(t => {
-        const shaped = ensureShape({
-          title: t.title || '',
-          text: t.text || '',
-          tags: t.tags || [],
-          emoji: t.emoji || '',
-          image: t.image || '',
-          category: t.category || catName
+      try{
+        const wb = XLSX.read(data, { type:'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
+        let startIndex = 0;
+        const firstRow = (rows[0] || []).map(c => String(c||'').toLowerCase());
+        if(firstRow.some(h => ['category','title','text','tags','image'].includes(h))) startIndex = 1;
+        const templatesFromSheet = [];
+        for(let r = startIndex; r < rows.length; r++){
+          const row = rows[r] || [];
+          const category = (row[0]||'').toString().trim() || wb.SheetNames[0] || 'Без категорії';
+          const title = (row[1]||'').toString().trim();
+          const text = (row[2]||'').toString().trim();
+          const tagsRaw = (row[3]||'').toString().trim();
+          const image = (row[4]||'').toString().trim();
+          if(!title && !text) continue;
+          const tags = tagsRaw ? tagsRaw.split(/[,;]+/).map(t=>t.trim()).filter(Boolean) : [];
+          templatesFromSheet.push({ title, category, text: autoFix(text), tags, image });
+        }
+        templatesFromSheet.forEach(t => {
+          const shaped = ensureShape(t);
+          const exists = templates.some(existing => existing.title === shaped.title && existing.text === shaped.text && existing.category === shaped.category);
+          if(!exists) templates.push(shaped);
+          if(!categoryOrder.includes(shaped.category)) categoryOrder.push(shaped.category);
         });
-        const exists = templates.some(existing => existing.title === shaped.title && existing.text === shaped.text && existing.category === shaped.category);
-        if(!exists) templates.push(shaped);
-      });
-    });
-    persist();
-    renderTemplates();
-  }
+        persist(); renderTemplates(); toast('Excel імпортовано (A=Category,B=Title,C=Text,D=Tags,E=Image)');
+      }catch(err){ console.error('XLSX import error', err); alert('Помилка імпорту XLSX'); }
+    };
+    reader.readAsArrayBuffer(file);
+    e.target.value = '';
+  });
 
   // import modal bindings
-  safeOn($('btnOpenImport'), 'click', ()=>{ $('modalImport').classList.add('show'); $('modalImport').setAttribute('aria-hidden','false'); });
-  safeOn($('btnImportClose'), 'click', ()=>{ $('modalImport').classList.remove('show'); $('modalImport').setAttribute('aria-hidden','true'); });
-  safeOn($('btnImportFile'), 'click', ()=>{ const f = $('importFile')?.files?.[0]; if(!f){ alert('Виберіть файл'); return; } const inp = $('xlsxImport'); if(inp){ inp.files = $('importFile').files; const ev = new Event('change'); inp.dispatchEvent(ev); } $('modalImport').classList.remove('show'); $('modalImport').setAttribute('aria-hidden','true'); });
-  safeOn($('btnImportCsvLink'), 'click', ()=>{ const url = $('gsCsvLink').value.trim(); if(!url){ alert('Вставте CSV link'); return; } importCsvLink(url); $('modalImport').classList.remove('show'); $('modalImport').setAttribute('aria-hidden','true'); });
-  safeOn($('btnImportGsApi'), 'click', async ()=>{ const id = $('gsSpreadsheetId').value.trim(); const key = $('gsApiKey').value.trim(); if(!id||!key){ alert('Вкажіть Spreadsheet ID та API Key'); return; } try{ const cats = await importTemplatesFromGS(id,key); if(cats && cats.length){ mergeImportedCategories(cats); toast('Імпорт з Google Sheets API завершено'); } else toast('Не знайдено шаблонів'); }catch(err){ console.error(err); alert('Помилка імпорту: '+(err.message||'')); } $('modalImport').classList.remove('show'); $('modalImport').setAttribute('aria-hidden','true'); });
-
-  // hidden input trigger
+  safeOn($('btnOpenImport'), 'click', ()=>{ showImportModal(); });
   safeOn($('btnTriggerImport'), 'click', ()=> $('xlsxImport').click());
 
   // background handlers
@@ -825,13 +1107,11 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   function init(){
     const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
     if(savedTheme === 'dark') document.body.classList.add('dark'); else document.body.classList.remove('dark');
-    // theme toggle
     safeOn($('btnTheme'), 'click', ()=> {
       const isDark = document.body.classList.toggle('dark');
       localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
     });
 
-    // zoomRange initial value
     const zoomRange = $('zoomRange');
     if(zoomRange){
       const base = 220;
@@ -841,7 +1121,6 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
       zoomRange.addEventListener('input', (e)=>{ const base=220; let w=Math.round(base * parseFloat(e.target.value)); const min=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tile-min'))||160; const max=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tile-max'))||360; if(w<min) w=min; if(w>max) w=max; document.documentElement.style.setProperty('--tile', w+'px'); localStorage.setItem(UI_TILE_KEY, String(w)); setTimeout(()=>renderTemplates(),120); });
     }
 
-    // restore bg
     const savedBg = localStorage.getItem(BG_KEY);
     if(savedBg) $('mainArea').style.backgroundImage = `url(${savedBg})`;
 
@@ -854,7 +1133,7 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   window.templates = templates;
   window.importTemplatesFromGS = importTemplatesFromGS;
   window.mergeImportedCategories = mergeImportedCategories;
-  window.importCsvLink = importCsvLink;
+  window.importCsvLink = importCsvLinkDirect;
   window.triggerImport = ()=> $('xlsxImport').click();
   window.undoDelete = undoDelete;
 
