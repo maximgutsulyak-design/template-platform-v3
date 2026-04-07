@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Шаблони — Менеджер</title>
+<style>
+/* Light tokens */
+:root{
+  --bg:#ffffff;
+  --panel:#f9fafb;
+  --card:#ffffff;
+  --text:#111827;
+  --muted:#6b7280;
+  --border:#e5e7eb;
+  --hover:#f3f4f6;
+
+  --tile-bg:#ffffff;
+  --tile-text:#111827;
+
+  --accent:#3b82f6;
+  --accent-soft:rgba(59,130,246,0.15);
+
+  --tile:220px;
+  --tile-min:160px;
+  --tile-max:360px;
+  --gap:12px;
+}
+
+/* Dark tokens (ChatGPT-like) */
+body.dark{
+  --bg:#212121;
+  --panel:#171717;
+  --card:#2a2a2a;
+  --text:#ececec;
+  --muted:#a1a1aa;
+  --border:#343434;
+  --hover:#2f2f2f;
+
+  --tile-bg:#2b2b2b;
+  --tile-text:#f5f5f5;
+
+  --accent:#3b82f6;
+  --accent-soft:rgba(59,130,246,0.2);
+}
+
+/* Base */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);transition:background-color .25s ease,color .25s ease}
+.app{display:flex;height:100vh}
+.sidebar{width:260px;background:var(--panel);border-right:1px solid var(--border);padding:14px;overflow:auto;display:flex;flex-direction:column;gap:12px;transition:background-color .25s ease,border-color .25s ease}
+.main{flex:1;display:flex;flex-direction:column;background-position:center;background-repeat:no-repeat;background-size:cover;background-color:var(--bg);transition:background-color .25s ease}
+.topbar{display:flex;gap:10px;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--border);align-items:center;z-index:120;transition:background-color .25s ease,border-color .25s ease}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;user-select:none;transition:background-color .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease}
+.btn:active{transform:translateY(1px)}
+.btn:hover{background:var(--hover)}
+.btn.active{background:var(--accent-soft);border-color:var(--accent);box-shadow:0 0 0 4px rgba(59,130,246,0.06)}
+.btn.cancel{background:#ef4444;color:#fff;border-color:#ef4444}
+
+/* Inputs */
+.search,.input,textarea,select{padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);transition:background-color .18s ease,color .18s ease,border-color .18s ease}
+.search{width:320px;min-width:120px}
+
+/* Categories */
+.category-btn{display:block;width:100%;padding:10px;margin-bottom:6px;border:none;border-radius:12px;background:none;color:var(--text);text-align:left;cursor:pointer;border:1px solid transparent;transition:background-color .18s ease,transform .16s ease}
+.category-btn:hover{transform:translateX(4px);background:var(--hover);border-color:var(--border)}
+.category-btn.active{background:var(--accent-soft);border-color:var(--accent)}
+
+/* Grid & tiles */
+.grid{padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--tile),1fr));gap:var(--gap);overflow:auto;transition:all .18s ease}
+.tile{position:relative;background:var(--tile-bg);color:var(--tile-text);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-height:140px;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background-color .25s ease,opacity .18s ease}
+.tile:hover{transform:translateY(-3px);border-color:var(--accent)}
+.tile.selected{outline:2px solid var(--accent);background:var(--accent-soft);transform:translateY(-4px);transition:transform .16s ease,outline-color .16s ease,background-color .2s ease}
+.thumb{width:100%;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;overflow:hidden;background:transparent}
+.thumb img{width:100%;height:100%;object-fit:contain;background:transparent}
+.title{padding:8px 10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.text{padding:0 10px 12px 10px;color:var(--muted);font-size:13px;white-space:pre-wrap;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* tile entrance animation */
+.tile { animation: tileIn .22s ease both; }
+@keyframes tileIn{
+  from{ opacity:0; transform:translateY(8px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+
+/* Modal */
+.modalWrap{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;visibility:hidden;transition:opacity .18s ease,visibility .18s ease;display:flex;align-items:center;justify-content:center;z-index:300}
+.modalWrap.show{opacity:1;visibility:visible}
+.modal{width:min(920px,96vw);background:var(--card);padding:16px;border-radius:10px;border:1px solid var(--border);max-height:90vh;overflow:auto;transform:translateY(10px) scale(.98);opacity:0;transition:all .18s ease}
+.modalWrap.show .modal{transform:translateY(0) scale(1);opacity:1}
+
+/* Toast */
+#__toast{position:fixed;right:20px;top:20px;background:rgba(0,0,0,0.85);color:#fff;padding:8px 12px;border-radius:8px;z-index:9999;opacity:0;transform:translateY(-8px);transition:opacity .18s ease,transform .18s ease}
+#__toast.show{opacity:1;transform:translateY(0)}
+
+/* Undo bar */
+.undoBar{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:rgba(0,0,0,0.85);color:#fff;padding:10px 14px;border-radius:8px;display:flex;gap:8px;align-items:center;z-index:9999;animation:toastIn .2s ease}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Responsive */
+@media(max-width:900px){ .search{width:160px} .sidebar{width:200px} }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div style="font-weight:700;font-size:18px">Шаблони</div>
+
+    <div>
+      <label class="small">Масштаб плиток</label>
+      <input id="zoomRange" type="range" min="0.7" max="1.6" step="0.05" value="1" style="width:100%" />
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <button id="btnTheme" class="btn">Тема</button>
+      <button id="btnOpenImport" class="btn">Імпорт</button>
+    </div>
+
+    <div id="categoryList" style="display:flex;flex-direction:column;gap:6px"></div>
+
+    <div style="margin-top:auto">
+      <button id="btnExport" class="btn" style="width:100%">Експорт JSON</button>
+    </div>
+  </aside>
+
+  <main class="main" id="mainArea">
+    <div class="topbar">
+      <input id="search" class="search" placeholder="Пошук..." />
+      <div style="display:flex;gap:8px;margin-left:8px">
+        <button id="btnAdd" class="btn">Додати</button>
+        <button id="btnEditMode" class="btn">Редагування</button>
+        <button id="btnSelectAll" class="btn">Виділити все</button>
+        <button id="btnDeleteSelected" class="btn">Видалити</button>
+        <button id="btnEditSelected" class="btn" style="display:none">Редагувати</button>
+        <button id="btnCancelSelection" class="btn cancel" style="display:none">Скасувати</button>
+      </div>
+      <div style="flex:1"></div>
+      <div style="display:flex;gap:8px">
+        <button id="btnChangeBg" class="btn">Фон</button>
+        <button id="btnTriggerImport" class="btn">Імпортувати файл</button>
+        <input id="xlsxImport" type="file" accept=".xlsx,.xls,.json" style="display:none" />
+      </div>
+    </div>
+
+    <div style="padding:12px;overflow:auto;height:calc(100% - 64px)">
+      <div id="undoContainer"></div>
+      <div id="grid" class="grid"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Editor modal -->
+<div id="modalEditor" class="modalWrap" aria-hidden="true">
+  <div class="modal" role="dialog">
+    <h3>Редактор шаблону</h3>
+    <div class="note">Поля: Title, Category, Tags, Emoji, Image, Text, Favorite</div>
+
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <input id="eTitle" class="input" placeholder="Title" style="flex:1" />
+      <input id="eCategory" class="input" placeholder="Category" style="width:180px" />
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <input id="eTags" class="input" placeholder="Tags (через кому)" style="flex:1" />
+      <input id="eEmoji" class="input" placeholder="Emoji" style="width:120px" />
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+      <input id="eImage" type="file" accept="image/*" />
+      <label style="display:flex;align-items:center;gap:8px"><input id="eFavorite" type="checkbox" /> <span class="small">Обране</span></label>
+    </div>
+
+    <div style="margin-bottom:8px">
+      <textarea id="eText" rows="8" class="input" style="width:100%" placeholder="Text"></textarea>
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <button id="eSave" class="btn">Зберегти</button>
+      <button id="eDelete" class="btn">Видалити</button>
+      <button id="eClose" class="btn">Закрити</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import modal (single) -->
+<div id="modalImport" class="modalWrap" aria-hidden="true">
+  <div class="modal" role="dialog">
+    <h3>Імпорт шаблонів</h3>
+    <div class="note">Оберіть спосіб імпорту. Excel: A=Title, B=Category, C=Text, D=Tags, E=Image. CSV/Google Sheets: A=Title, B=Text, C=Tags, D=Emoji, E=Image, F=Category.</div>
+
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+      <div style="flex:1;min-width:280px">
+        <div class="small" style="margin-bottom:6px">Файл (JSON/XLSX)</div>
+        <input id="importFile" type="file" accept=".json,.xlsx,.xls" />
+        <div style="margin-top:8px"><button id="btnImportFile" class="btn">Імпортувати файл (Excel A→Title,B→Category,C→Text,D→Tags,E→Image)</button></div>
+      </div>
+
+      <div style="flex:1;min-width:280px">
+        <div class="small" style="margin-bottom:6px">Google Sheets (CSV link)</div>
+        <input id="gsCsvLink" class="input" placeholder="CSV link (export?format=csv)" style="width:100%;margin-bottom:8px" />
+        <div style="margin-bottom:8px"><button id="btnImportCsvLink" class="btn">Імпортувати CSV (A→Title,B→Text,C→Tags,D→Emoji,E→Image,F→Category)</button></div>
+
+        <div class="small" style="margin-bottom:6px">Google Sheets API (Spreadsheet ID + API Key)</div>
+        <input id="gsSpreadsheetId" class="input" placeholder="Spreadsheet ID" style="width:100%;margin-bottom:8px" />
+        <input id="gsApiKey" class="input" placeholder="API Key" style="width:100%" />
+        <div style="margin-top:8px"><button id="btnImportGsApi" class="btn">Імпортувати через API (A→Title,B→Text,C→Tags,D→Emoji,E→Image,F→Category)</button></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button id="btnImportClose" class="btn">Закрити</button>
+    </div>
+
+    <div id="importStatus" class="small" style="margin-top:8px;color:var(--muted)"></div>
+  </div>
+</div>
+
+<!-- Background modal -->
+<div id="modalBg" class="modalWrap" aria-hidden="true">
+  <div class="modal" role="dialog">
+    <h3>Фон</h3>
+    <div class="note">Завантажте зображення — PNG з прозорістю збережеться прозорим.</div>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <input id="bgFile" type="file" accept="image/*" />
+    </div>
+    <div style="display:flex;gap:8px">
+      <button id="bgApply" class="btn">Застосувати</button>
+      <button id="bgClose" class="btn">Закрити</button>
+      <button id="bgClear" class="btn">Очистити</button>
+    </div>
+    <div id="bgStatus" class="small" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<!-- libs -->
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'brainTemplates';
+  const CATEGORY_ORDER_KEY = 'categoryOrder';
+  const BG_KEY = 'mainBackground';
+  const THEME_KEY = 'themePreference';
+  const UI_TILE_KEY = 'uiTileWidth';
+  const UNDO_TIMEOUT_MS = 9000;
+
+  const $ = id => document.getElementById(id);
+  const safeOn = (el, ev, fn) => { if(!el) return; try{ el.addEventListener(ev, fn); }catch(e){ console.warn(e); } };
+  const uid = ()=> Date.now().toString(36)+'-'+Math.floor(Math.random()*1e6).toString(36);
+
+  function sanitizeText(v){ if(!v) return ''; return String(v||'').replace(/\uFEFF/g,'').trim(); }
+  function parseTags(v){ if(!v) return []; if(Array.isArray(v)) return v.map(x=>String(x).toLowerCase().trim()).filter(Boolean); return String(v).split(/[,;]+/).map(x=>x.toLowerCase().trim()).filter(Boolean); }
+  function ensureShape(item){
+    return {
+      id: item.id ? String(item.id) : uid(),
+      title: sanitizeText(item.title || item.Title || item.name || ''),
+      text: sanitizeText(item.text || item.Text || item.Content || item.content || ''),
+      category: sanitizeText(item.category || item.Category || item.cat || 'Без категорії'),
+      tags: parseTags(item.tags || item.Tags || item.TagsList || ''),
+      emoji: (item.emoji || item.Emoji || '').toString().slice(0,4),
+      image: (item.image || item['Image URL'] || '').toString().trim(),
+      favorite: Boolean(item.favorite || false),
+      usage: Number(item.usage || 0),
+      updatedAt: Number(item.updatedAt || Date.now())
+    };
+  }
+
+  // state
+  let templates = (JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || [
+    { id:'s1', title:'Привітання', category:'Basic', text:'Вітаю! Зараз допоможу вам.', tags:['вітання'], emoji:'💬', favorite:true, usage:8 },
+    { id:'s2', title:'eSIM QR', category:'SIM', text:'Надсилаю QR-код.', tags:['esim','qr'], emoji:'📱', favorite:false, usage:3 }
+  ]).map(ensureShape);
+
+  let categoryOrder = JSON.parse(localStorage.getItem(CATEGORY_ORDER_KEY) || 'null') || Array.from(new Set(templates.map(t=>t.category)));
+  let currentCategory = 'Усі';
+  let editMode = false;
+  window.selectedTiles = [];
+  let lastSelectedIndex = null;
+  let editingId = null;
+
+  // undo
+  let undoStack = [];
+  let undoTimer = null;
+
+  function persist(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(templates)); localStorage.setItem(CATEGORY_ORDER_KEY, JSON.stringify(categoryOrder)); }
+
+  function toast(msg){
+    let el = $('__toast');
+    if(!el){
+      el = document.createElement('div'); el.id='__toast'; document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.classList.add('show');
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0)';
+    setTimeout(()=>{ el.style.opacity='0'; }, 1400);
+  }
+
+  // UI sync
+  function syncSelectionUI(){
+    $('btnCancelSelection').style.display = window.selectedTiles.length ? 'inline-flex' : 'none';
+    $('btnEditSelected').style.display = (window.selectedTiles.length === 1 && editMode) ? 'inline-flex' : 'none';
+  }
+
+  // selection helpers
+  function toggleSelection(id){
+    const tile = document.querySelector(`.tile[data-id="${id}"]`);
+    const idx = window.selectedTiles.indexOf(id);
+    if(idx === -1){ window.selectedTiles.push(id); if(tile) tile.classList.add('selected'); }
+    else { window.selectedTiles.splice(idx,1); if(tile) tile.classList.remove('selected'); }
+    syncSelectionUI();
+  }
+
+  function clearSelection(){
+    window.selectedTiles.forEach(id => { const el = document.querySelector(`.tile[data-id="${id}"]`); if(el) el.classList.remove('selected'); });
+    window.selectedTiles = []; lastSelectedIndex = null; syncSelectionUI();
+  }
+
+  function selectAllVisible(){
+    const list = filtered();
+    window.selectedTiles = list.map(t => t.id);
+    renderTemplates();
+    syncSelectionUI();
+  }
+
+  // filtered
+  function filtered(){
+    const q = ($('search')?.value || '').trim().toLowerCase();
+    return templates.filter(t => currentCategory === 'Усі' ? true : currentCategory === '📌 Обране' ? t.favorite : t.category === currentCategory)
+      .filter(t => !q || (t.title + ' ' + t.text + ' ' + (t.tags||[]).join(' ')).toLowerCase().includes(q));
+  }
+
+  // build tile
+  function buildTile(t){
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+    tile.dataset.id = t.id;
+
+    const thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    if(t.image){
+      const img = document.createElement('img');
+      img.src = t.image;
+      img.alt = t.title || '';
+      img.addEventListener('click', (e)=>{ e.stopPropagation(); copyAndCount(t.id); });
+      thumb.appendChild(img);
+    } else {
+      thumb.textContent = t.emoji || (t.title ? t.title.slice(0,1).toUpperCase() : 'T');
+    }
+    tile.appendChild(thumb);
+
+    const title = document.createElement('div');
+    title.className = 'title';
+    title.textContent = t.title || 'Без назви';
+    tile.appendChild(title);
+
+    const text = document.createElement('div');
+    text.className = 'text';
+    text.textContent = t.text || '';
+    tile.appendChild(text);
+
+    tile.addEventListener('click', (ev)=>{
+      const list = filtered();
+      if(!editMode){ copyAndCount(t.id); return; }
+      const idx = list.findIndex(x=>x.id===t.id);
+      if(ev.shiftKey && lastSelectedIndex !== null && lastSelectedIndex !== undefined){
+        const s = Math.min(lastSelectedIndex, idx);
+        const e = Math.max(lastSelectedIndex, idx);
+        for(let i=s;i<=e;i++){
+          const id = list[i].id;
+          if(!window.selectedTiles.includes(id)){
+            window.selectedTiles.push(id);
+            const el = document.querySelector(`.tile[data-id="${id}"]`);
+            if(el) el.classList.add('selected');
+          }
+        }
+      } else if(ev.ctrlKey || ev.metaKey){
+        toggleSelection(t.id);
+      } else {
+        toggleSelection(t.id);
+      }
+      lastSelectedIndex = idx;
+    });
+
+    if(window.selectedTiles.includes(t.id)) tile.classList.add('selected');
+    return tile;
+  }
+
+  // remove empty templates
+  function removeEmptyTemplates(){
+    const before = templates.length;
+    templates = templates.filter(t => (t.title && t.title.trim()) || (t.text && t.text.trim()));
+    if(templates.length !== before) persist();
+  }
+
+  // render
+  function renderTemplates(){
+    removeEmptyTemplates();
+    const grid = $('grid');
+    if(!grid) return;
+    grid.innerHTML = '';
+    const list = filtered();
+
+    // If no real templates, do not add placeholders
+    if(list.length === 0){
+      initSortableTemplates();
+      renderCategories();
+      syncSelectionUI();
+      return;
+    }
+
+    // append tiles with slight stagger to feel smooth but light
+    list.forEach((t, i) => {
+      const tile = buildTile(t);
+      tile.style.animationDelay = (i * 12) + 'ms';
+      grid.appendChild(tile);
+    });
+
+    fillPlaceholders();
+    syncSelectionUI();
+    initSortableTemplates();
+    renderCategories();
+  }
+
+  function fillPlaceholders(){
+    const grid = $('grid');
+    if(!grid) return;
+    Array.from(grid.querySelectorAll('.tile.placeholder')).forEach(n=>n.remove());
+    const realTiles = Array.from(grid.children).filter(ch => ch.classList && ch.classList.contains('tile') && ch.dataset && ch.dataset.id);
+    const realCount = realTiles.length;
+    if(realCount === 0) return;
+    const tileW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tile')) || 220;
+    const gap = parseInt(getComputedStyle(grid).getPropertyValue('gap')) || 12;
+    const cols = Math.max(1, Math.floor((grid.clientWidth + gap) / (tileW + gap)));
+    if(cols <= 1) return;
+    const rem = realCount % cols;
+    if(rem === 0) return;
+    const need = cols - rem;
+    for(let i=0;i<need;i++){
+      const ph = document.createElement('div');
+      ph.className = 'tile placeholder';
+      ph.setAttribute('aria-hidden','true');
+      ph.draggable = false;
+      ph.innerHTML = '<div class="thumb"></div><div class="title" style="opacity:.35">Пусто</div>';
+      grid.appendChild(ph);
+    }
+  }
+
+  // sortable templates (exclude placeholders)
+  let sortableTemplates = null;
+  function initSortableTemplates(){
+    const grid = $('grid');
+    if(!grid) return;
+    if(sortableTemplates) {
+      try{ sortableTemplates.destroy(); }catch(e){}
+      sortableTemplates = null;
+    }
+    if(!window.Sortable) return;
+    sortableTemplates = Sortable.create(grid, {
+      animation: 150,
+      handle: '.tile',
+      filter: '.placeholder',
+      onMove: function(evt){
+        if(evt.related && evt.related.classList && evt.related.classList.contains('placeholder')) return false;
+        return true;
+      },
+      onEnd: (evt) => {
+        const ids = Array.from(grid.children).map(ch => ch.dataset && ch.dataset.id ? ch.dataset.id : null).filter(Boolean);
+        const newTemplates = [];
+        ids.forEach(id => { const t = templates.find(x=>x.id===id); if(t) newTemplates.push(t); });
+        templates.forEach(t => { if(!newTemplates.find(x=>x.id===t.id)) newTemplates.push(t); });
+        templates = newTemplates;
+        persist();
+        renderTemplates();
+      }
+    });
+  }
+
+  // copy and count
+  function copyAndCount(id){
+    const t = templates.find(x=>x.id===id);
+    if(!t) return;
+    navigator.clipboard?.writeText(t.text || '').then(()=>{ t.usage = (t.usage||0)+1; persist(); renderTemplates(); toast(`Скопійовано: «${t.title}»`); }).catch(()=>{ alert('Не вдалося скопіювати'); });
+  }
+
+  // editor
+  function openEditor(id){
+    editingId = id || null;
+    $('modalEditor').classList.add('show'); $('modalEditor').setAttribute('aria-hidden','false');
+    if(editingId){
+      const t = templates.find(x=>x.id===editingId);
+      if(t){
+        $('eTitle').value = t.title || '';
+        $('eCategory').value = t.category || '';
+        $('eText').value = t.text || '';
+        $('eTags').value = (t.tags||[]).join(', ');
+        $('eEmoji').value = t.emoji || '';
+        $('eFavorite').checked = !!t.favorite;
+      }
+    } else {
+      $('eTitle').value=''; $('eCategory').value=''; $('eText').value=''; $('eTags').value=''; $('eEmoji').value=''; $('eFavorite').checked=false;
+      try{ $('eImage').value=''; }catch(e){}
+    }
+  }
+
+  function closeEditor(){ $('modalEditor').classList.remove('show'); $('modalEditor').setAttribute('aria-hidden','true'); editingId = null; }
+
+  async function saveTemplate(){
+    const title = $('eTitle').value.trim();
+    const category = $('eCategory').value.trim() || 'Без категорії';
+    const text = $('eText').value.trim();
+    const tags = $('eTags').value.split(/[,;]+/).map(s=>s.trim().toLowerCase()).filter(Boolean);
+    const emoji = $('eEmoji').value.trim();
+    const favorite = !!$('eFavorite').checked;
+    const file = $('eImage').files && $('eImage').files[0];
+    if(!title && !text){ alert('Потрібні назва або текст'); return; }
+    let imageData = '';
+    if(file) imageData = await fileToDataURL(file);
+    if(editingId){
+      templates = templates.map(t => t.id===editingId ? Object.assign({}, t, { title, category, text, tags, emoji, favorite, image: imageData || t.image, updatedAt: Date.now() }) : t);
+    } else {
+      templates.unshift(ensureShape({ title, category, text, tags, emoji, image: imageData, favorite }));
+    }
+    if(!categoryOrder.includes(category)) categoryOrder.push(category);
+    persist(); renderTemplates(); closeEditor();
+  }
+
+  function deleteCurrentTemplate(){
+    if(!editingId) return;
+    if(!confirm('Видалити шаблон?')) return;
+    const idx = templates.findIndex(t=>t.id===editingId);
+    if(idx===-1) return;
+    const removed = templates.splice(idx,1)[0];
+    undoStack = [removed];
+    startUndoTimer();
+    persist(); renderTemplates(); closeEditor(); showUndoBar();
+  }
+
+  function fileToDataURL(file){
+    return new Promise((resolve)=>{
+      const reader = new FileReader();
+      reader.onload = (e)=> resolve(e.target.result);
+      reader.onerror = ()=> resolve('');
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // delete selected
+  function deleteSelected(){
+    if(window.selectedTiles.length === 0){ alert('Виберіть шаблони'); return; }
+    if(!confirm(`Видалити ${window.selectedTiles.length} шаблон(ів)?`)) return;
+    const deleted = templates.filter(t => window.selectedTiles.includes(t.id));
+    templates = templates.filter(t => !window.selectedTiles.includes(t.id));
+    undoStack = deleted.slice();
+    startUndoTimer();
+    clearSelection();
+    persist();
+    renderTemplates();
+    showUndoBar();
+  }
+
+  // undo
+  function startUndoTimer(){
+    if(undoTimer) clearTimeout(undoTimer);
+    undoTimer = setTimeout(()=>{ undoStack = []; hideUndoBar(); undoTimer = null; }, UNDO_TIMEOUT_MS);
+  }
+
+  function undoDelete(){
+    if(!undoStack.length) return;
+    templates = [...undoStack.map(ensureShape), ...templates];
+    undoStack = [];
+    if(undoTimer) clearTimeout(undoTimer);
+    undoTimer = null;
+    persist();
+    renderTemplates();
+    hideUndoBar();
+    toast('Відновлено шаблони');
+  }
+
+  function showUndoBar(){
+    hideUndoBar();
+    const bar = document.createElement('div');
+    bar.id = '__undoBar';
+    bar.className = 'undoBar';
+    const count = undoStack.length;
+    bar.innerHTML = `<div>Видалено ${count} шаблон(ів)</div>`;
+    const btn = document.createElement('button'); btn.className='btn'; btn.textContent='Відмінити'; btn.onclick = undoDelete;
+    const btnClose = document.createElement('button'); btnClose.className='btn'; btnClose.textContent='Закрити'; btnClose.onclick = ()=>{ undoStack = []; if(undoTimer) clearTimeout(undoTimer); hideUndoBar(); };
+    bar.appendChild(btn); bar.appendChild(btnClose);
+    document.body.appendChild(bar);
+  }
+  function hideUndoBar(){ const b = $('__undoBar'); if(b) b.remove(); }
+
+  // import helpers
+  function autoFix(text){ if(!text) return ''; return String(text).replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim(); }
+
+  // hidden input handler for XLSX/JSON (Excel mapping A=Title,B=Category,C=Text,D=Tags,E=Image)
+  safeOn($('xlsxImport'), 'change', (e)=>{
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const data = new Uint8Array(ev.target.result);
+      const name = file.name.toLowerCase();
+      if(name.endsWith('.json')){
+        try{
+          const parsed = JSON.parse(new TextDecoder().decode(data));
+          if(Array.isArray(parsed)){
+            const shaped = parsed.map(p=>ensureShape(p));
+            templates = [...shaped, ...templates];
+            shaped.forEach(s=>{ if(s.category && !categoryOrder.includes(s.category)) categoryOrder.push(s.category); });
+            persist(); renderTemplates(); toast('JSON імпортовано');
+          } else alert('JSON має бути масивом шаблонів');
+        }catch(err){ alert('JSON пошкоджений'); console.error(err); }
+        e.target.value = ''; return;
+      }
+      try{
+        const wb = XLSX.read(data, { type:'array' });
+        const allImported = [];
+        wb.SheetNames.forEach(sheetName => {
+          const ws = wb.Sheets[sheetName];
+          const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
+          // detect header row
+          let startIndex = 0;
+          const firstRow = (rows[0] || []).map(c => String(c||'').toLowerCase());
+          if(firstRow.some(h => ['title','category','text','tags','image'].includes(h))) startIndex = 1;
+          const templatesFromSheet = [];
+          for(let r = startIndex; r < rows.length; r++){
+            const row = rows[r] || [];
+            // Excel mapping required: A=Title, B=Category, C=Text, D=Tags, E=Image URL
+            const title = (row[0]||'').toString().trim();
+            const category = (row[1]||'').toString().trim() || sheetName || 'Без категорії';
+            const text = (row[2]||'').toString().trim();
+            const tagsRaw = (row[3]||'').toString().trim();
+            const image = (row[4]||'').toString().trim();
+            if(!title && !text) continue;
+            const tags = tagsRaw ? tagsRaw.split(/[,;]+/).map(t=>t.trim()).filter(Boolean) : [];
+            templatesFromSheet.push({ title, category, text: autoFix(text), tags, image });
+          }
+          if(templatesFromSheet.length) allImported.push({ name: sheetName, templates: templatesFromSheet });
+        });
+        // merge imported
+        allImported.forEach(cat => {
+          const catName = cat.name || 'Без категорії';
+          if(!categoryOrder.includes(catName)) categoryOrder.push(catName);
+          cat.templates.forEach(t => {
+            const shaped = ensureShape({
+              title: t.title || '',
+              text: t.text || '',
+              tags: t.tags || [],
+              emoji: t.emoji || '',
+              image: t.image || '',
+              category: t.category || catName
+            });
+            const exists = templates.some(existing => existing.title === shaped.title && existing.text === shaped.text && existing.category === shaped.category);
+            if(!exists) templates.push(shaped);
+          });
+        });
+        persist(); renderTemplates(); toast('Excel імпортовано (A=Title,B=Category,C=Text,D=Tags,E=Image)');
+      }catch(err){ console.error('XLSX import error', err); alert('Помилка імпорту XLSX'); }
+    };
+    reader.readAsArrayBuffer(file);
+    e.target.value = '';
+  });
+
+  // CSV link import (Google Sheets CSV mapping A=Title,B=Text,C=Tags,D=Emoji,E=Image,F=Category)
+  async function importCsvLink(url){
+    if(!url) return;
+    try{
+      const res = await fetch(url);
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const csv = await res.text();
+      const parsed = Papa.parse(csv, { skipEmptyLines:true });
+      const rows = parsed.data || [];
+      let startIndex = 0;
+      const firstRow = (rows[0] || []).map(c => String(c||'').toLowerCase());
+      if(firstRow.some(h => ['title','text','tags','emoji','image','category'].includes(h))) startIndex = 1;
+      const mapped = [];
+      for(let r = startIndex; r < rows.length; r++){
+        const row = rows[r] || [];
+        // Google Sheets CSV mapping: A=Title, B=Text, C=Tags, D=Emoji, E=Image, F=Category
+        const title = (row[0]||'').toString().trim();
+        const text = (row[1]||'').toString().trim();
+        const tagsRaw = (row[2]||'').toString().trim();
+        const emoji = (row[3]||'').toString().trim();
+        const image = (row[4]||'').toString().trim();
+        const category = (row[5]||'').toString().trim() || 'Без категорії';
+        if(!title && !text) continue;
+        const tags = tagsRaw ? tagsRaw.split(/[,;]+/).map(t=>t.trim()).filter(Boolean) : [];
+        mapped.push({ title, category, text: autoFix(text), tags, emoji, image });
+      }
+      const shaped = mapped.map(m => ensureShape(m));
+      templates = [...shaped, ...templates];
+      shaped.forEach(s=>{ if(s.category && !categoryOrder.includes(s.category)) categoryOrder.push(s.category); });
+      persist(); renderTemplates(); toast('CSV імпортовано (Google Sheets мапінг)');
+    }catch(err){ console.error(err); alert('Помилка імпорту CSV'); }
+  }
+
+  // Google Sheets API import (A=Title,B=Text,C=Tags,D=Emoji,E=Image,F=Category)
+  async function importTemplatesFromGS(spreadsheetId, apiKey){
+    if(!spreadsheetId || !apiKey) throw new Error('Spreadsheet ID and API key required');
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}?includeGridData=true&key=${encodeURIComponent(apiKey)}`;
+    const res = await fetch(url);
+    if(!res.ok){
+      const txt = await res.text().catch(()=>res.statusText);
+      throw new Error(`Google Sheets API error ${res.status}: ${txt}`);
+    }
+    const data = await res.json();
+    const categories = [];
+    if(!Array.isArray(data.sheets)) return categories;
+    for(const sheet of data.sheets){
+      const sheetName = sheet.properties && sheet.properties.title ? String(sheet.properties.title) : 'Лист';
+      const rows = (sheet.data && sheet.data[0] && sheet.data[0].rowData) ? sheet.data[0].rowData : [];
+      if(rows.length < 1) continue;
+      // detect header row
+      let startIndex = 0;
+      const headerCells = (rows[0].values || []).map(c => (c && c.formattedValue) ? String(c.formattedValue).toLowerCase() : '');
+      if(headerCells.some(h => ['title','text','tags','emoji','image','category'].includes(h))) startIndex = 1;
+      const templatesFromSheet = [];
+      for(let r = startIndex; r < rows.length; r++){
+        const row = rows[r];
+        const cells = row.values || [];
+        const getCell = (i) => (cells[i] && typeof cells[i].formattedValue !== 'undefined') ? String(cells[i].formattedValue) : '';
+        const title = getCell(0).trim();
+        const text  = getCell(1).trim();
+        const tagsRaw = getCell(2).trim();
+        const emoji = getCell(3).trim();
+        const image = getCell(4).trim();
+        const category = getCell(5).trim() || sheetName || 'Без категорії';
+        if(!title && !text) continue;
+        const tags = tagsRaw ? tagsRaw.split(/[,;]+/).map(t=>t.trim()).filter(Boolean) : [];
+        templatesFromSheet.push({ title, category, text: autoFix(text), tags, emoji, image });
+      }
+      if(templatesFromSheet.length) categories.push({ name: sheetName, templates: templatesFromSheet });
+    }
+    return categories;
+  }
+
+  function mergeImportedCategories(importedCategories){
+    importedCategories.forEach(cat => {
+      const catName = cat.name || 'Без категорії';
+      if(!categoryOrder.includes(catName)) categoryOrder.push(catName);
+      cat.templates.forEach(t => {
+        const shaped = ensureShape({
+          title: t.title || '',
+          text: t.text || '',
+          tags: t.tags || [],
+          emoji: t.emoji || '',
+          image: t.image || '',
+          category: t.category || catName
+        });
+        const exists = templates.some(existing => existing.title === shaped.title && existing.text === shaped.text && existing.category === shaped.category);
+        if(!exists) templates.push(shaped);
+      });
+    });
+    persist();
+    renderTemplates();
+  }
+
+  // import modal bindings
+  safeOn($('btnOpenImport'), 'click', ()=>{ $('modalImport').classList.add('show'); $('modalImport').setAttribute('aria-hidden','false'); });
+  safeOn($('btnImportClose'), 'click', ()=>{ $('modalImport').classList.remove('show'); $('modalImport').setAttribute('aria-hidden','true'); });
+  safeOn($('btnImportFile'), 'click', ()=>{ const f = $('importFile')?.files?.[0]; if(!f){ alert('Виберіть файл'); return; } const inp = $('xlsxImport'); if(inp){ inp.files = $('importFile').files; const ev = new Event('change'); inp.dispatchEvent(ev); } $('modalImport').classList.remove('show'); $('modalImport').setAttribute('aria-hidden','true'); });
+  safeOn($('btnImportCsvLink'), 'click', ()=>{ const url = $('gsCsvLink').value.trim(); if(!url){ alert('Вставте CSV link'); return; } importCsvLink(url); $('modalImport').classList.remove('show'); $('modalImport').setAttribute('aria-hidden','true'); });
+  safeOn($('btnImportGsApi'), 'click', async ()=>{ const id = $('gsSpreadsheetId').value.trim(); const key = $('gsApiKey').value.trim(); if(!id||!key){ alert('Вкажіть Spreadsheet ID та API Key'); return; } try{ const cats = await importTemplatesFromGS(id,key); if(cats && cats.length){ mergeImportedCategories(cats); toast('Імпорт з Google Sheets API завершено'); } else toast('Не знайдено шаблонів'); }catch(err){ console.error(err); alert('Помилка імпорту: '+(err.message||'')); } $('modalImport').classList.remove('show'); $('modalImport').setAttribute('aria-hidden','true'); });
+
+  // hidden input trigger
+  safeOn($('btnTriggerImport'), 'click', ()=> $('xlsxImport').click());
+
+  // background handlers
+  safeOn($('btnChangeBg'), 'click', ()=>{ $('modalBg').classList.add('show'); $('modalBg').setAttribute('aria-hidden','false'); });
+  safeOn($('bgClose'), 'click', ()=>{ $('modalBg').classList.remove('show'); $('modalBg').setAttribute('aria-hidden','true'); });
+  safeOn($('bgClear'), 'click', ()=>{ $('mainArea').style.backgroundImage=''; localStorage.removeItem(BG_KEY); $('bgStatus').textContent='Очищено'; setTimeout(()=>$('bgStatus').textContent='',800); });
+  safeOn($('bgApply'), 'click', ()=>{ const f = $('bgFile'); if(!f||!f.files||!f.files[0]){ $('bgStatus').textContent='Виберіть файл'; return; } const r = new FileReader(); r.onload = e => { const src = e.target.result; $('mainArea').style.backgroundImage = `url(${src})`; localStorage.setItem(BG_KEY, src); $('bgStatus').textContent='Застосовано'; setTimeout(()=>{ $('modalBg').classList.remove('show'); $('modalBg').setAttribute('aria-hidden','true'); $('bgStatus').textContent=''; },600); }; r.readAsDataURL(f.files[0]); });
+
+  // editor bindings
+  safeOn($('btnAdd'), 'click', ()=> openEditor(null));
+  safeOn($('eClose'), 'click', ()=> closeEditor());
+  safeOn($('eSave'), 'click', ()=> saveTemplate());
+  safeOn($('eDelete'), 'click', ()=> { if(confirm('Ви впевнені?')) deleteCurrentTemplate(); });
+
+  // selection & other bindings
+  safeOn($('btnEditMode'), 'click', ()=> { editMode = !editMode; $('btnEditMode').classList.toggle('active', editMode); if(!editMode) clearSelection(); });
+  safeOn($('btnSelectAll'), 'click', ()=> selectAllVisible());
+  safeOn($('btnCancelSelection'), 'click', ()=> clearSelection());
+  safeOn($('btnDeleteSelected'), 'click', ()=> deleteSelected());
+  safeOn($('btnEditSelected'), 'click', ()=> { if(window.selectedTiles.length !== 1){ alert('Виберіть один шаблон'); return; } openEditor(window.selectedTiles[0]); });
+
+  // export
+  safeOn($('btnExport'), 'click', ()=>{ const data = JSON.stringify(templates,null,2); const blob = new Blob([data],{type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='templates.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),1000); });
+
+  // search
+  safeOn($('search'), 'input', ()=> { clearSelection(); renderTemplates(); });
+
+  // keyboard quick copy
+  document.addEventListener('keydown', (e)=>{ const active = document.activeElement; if(active && (active.tagName==='INPUT' || active.tagName==='TEXTAREA' || active.isContentEditable)) return; const idx = e.key === '0' ? 9 : parseInt(e.key)-1; if(!isNaN(idx) && idx>=0){ const list = filtered(); if(list[idx]) copyAndCount(list[idx].id); } if(e.ctrlKey && e.key.toLowerCase()==='k'){ e.preventDefault(); $('search').focus(); } });
+
+  // storage sync
+  window.addEventListener('storage', (e)=>{ if(e.key === STORAGE_KEY){ try{ const parsed = JSON.parse(e.newValue); if(Array.isArray(parsed)){ templates = parsed.map(ensureShape); renderTemplates(); } }catch(err){ console.warn(err); } } if(e.key === CATEGORY_ORDER_KEY){ try{ const parsed = JSON.parse(e.newValue); if(Array.isArray(parsed)){ categoryOrder = parsed; renderCategories(); } }catch(err){ console.warn(err); } } if(e.key === BG_KEY){ const bg = localStorage.getItem(BG_KEY); $('mainArea').style.backgroundImage = bg ? `url(${bg})` : ''; } });
+
+  // render categories
+  function renderCategories(){
+    const wrap = $('categoryList');
+    if(!wrap) return;
+    const allCats = Array.from(new Set(templates.map(t=>t.category)));
+    allCats.forEach(c => { if(!categoryOrder.includes(c)) categoryOrder.push(c); });
+    categoryOrder = categoryOrder.filter(c => allCats.includes(c));
+    wrap.innerHTML = '';
+    const base = ['Усі','📌 Обране'];
+    base.forEach(b=>{
+      const btn = document.createElement('button');
+      btn.className = 'category-btn' + (b===currentCategory ? ' active' : '');
+      btn.textContent = b;
+      btn.onclick = ()=>{ currentCategory = b; clearSelection(); renderTemplates(); };
+      wrap.appendChild(btn);
+    });
+    categoryOrder.forEach(cat=>{
+      const b = document.createElement('button');
+      b.className = 'category-btn' + (cat===currentCategory ? ' active' : '');
+      b.textContent = cat;
+      b.onclick = ()=>{ currentCategory = cat; clearSelection(); renderTemplates(); };
+      wrap.appendChild(b);
+    });
+
+    if(window.Sortable){
+      try{ if(window._sortableCats) window._sortableCats.destroy(); }catch(e){}
+      window._sortableCats = Sortable.create(wrap, {
+        animation: 150,
+        handle: '.category-btn',
+        onEnd: function(){
+          const items = Array.from(wrap.querySelectorAll('.category-btn')).map(b=>b.textContent).filter(t=>t!=='Усі' && t!=='📌 Обране');
+          categoryOrder = items;
+          persist();
+        }
+      });
+    }
+  }
+
+  // init
+  function init(){
+    const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+    if(savedTheme === 'dark') document.body.classList.add('dark'); else document.body.classList.remove('dark');
+    // theme toggle
+    safeOn($('btnTheme'), 'click', ()=> {
+      const isDark = document.body.classList.toggle('dark');
+      localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
+    });
+
+    // zoomRange initial value
+    const zoomRange = $('zoomRange');
+    if(zoomRange){
+      const base = 220;
+      const saved = localStorage.getItem(UI_TILE_KEY);
+      if(saved) zoomRange.value = (parseInt(saved)/base).toFixed(2);
+      else zoomRange.value = 1;
+      zoomRange.addEventListener('input', (e)=>{ const base=220; let w=Math.round(base * parseFloat(e.target.value)); const min=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tile-min'))||160; const max=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tile-max'))||360; if(w<min) w=min; if(w>max) w=max; document.documentElement.style.setProperty('--tile', w+'px'); localStorage.setItem(UI_TILE_KEY, String(w)); setTimeout(()=>fillPlaceholders(),120); });
+    }
+
+    // restore bg
+    const savedBg = localStorage.getItem(BG_KEY);
+    if(savedBg) $('mainArea').style.backgroundImage = `url(${savedBg})`;
+
+    renderCategories(); renderTemplates();
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+
+  // expose for debug
+  window.templates = templates;
+  window.importTemplatesFromGS = importTemplatesFromGS;
+  window.mergeImportedCategories = mergeImportedCategories;
+  window.importCsvLink = importCsvLink;
+  window.triggerImport = ()=> $('xlsxImport').click();
+  window.undoDelete = undoDelete;
+
+})();
+</script>
+</body>
+</html>
