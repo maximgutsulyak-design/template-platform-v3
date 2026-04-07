@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Шаблони — Менеджер</title>
 <style>
-/* Light tokens */
 :root{
   --bg:#ffffff;
   --panel:#f9fafb;
@@ -14,20 +13,15 @@
   --muted:#6b7280;
   --border:#e5e7eb;
   --hover:#f3f4f6;
-
   --tile-bg:#ffffff;
   --tile-text:#111827;
-
   --accent:#3b82f6;
   --accent-soft:rgba(59,130,246,0.15);
-
   --tile:220px;
   --tile-min:160px;
   --tile-max:360px;
   --gap:12px;
 }
-
-/* Dark tokens (ChatGPT-like) */
 body.dark{
   --bg:#212121;
   --panel:#171717;
@@ -36,46 +30,41 @@ body.dark{
   --muted:#a1a1aa;
   --border:#343434;
   --hover:#2f2f2f;
-
   --tile-bg:#2b2b2b;
   --tile-text:#f5f5f5;
-
   --accent:#3b82f6;
   --accent-soft:rgba(59,130,246,0.2);
 }
-
-/* Base */
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);transition:background-color .25s ease,color .25s ease}
 .app{display:flex;height:100vh}
-.sidebar{width:260px;background:var(--panel);border-right:1px solid var(--border);padding:14px;overflow:auto;display:flex;flex-direction:column;gap:12px;transition:background-color .25s ease,border-color .25s ease}
-.main{flex:1;display:flex;flex-direction:column;background-position:center;background-repeat:no-repeat;background-size:cover;background-color:var(--bg);transition:background-color .25s ease}
-.topbar{display:flex;gap:10px;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--border);align-items:center;z-index:120;transition:background-color .25s ease,border-color .25s ease}
+.sidebar{width:260px;background:var(--panel);border-right:1px solid var(--border);padding:14px;overflow:auto;display:flex;flex-direction:column;gap:12px}
+.main{flex:1;display:flex;flex-direction:column;background-position:center;background-repeat:no-repeat;background-size:cover;background-color:var(--bg)}
+.topbar{display:flex;gap:10px;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--border);align-items:center;z-index:120}
 
 /* Buttons */
-.btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;user-select:none;transition:background-color .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease}
-.btn:active{transform:translateY(1px)}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;user-select:none;transition:background-color .18s ease}
 .btn:hover{background:var(--hover)}
-.btn.active{background:var(--accent-soft);border-color:var(--accent);box-shadow:0 0 0 4px rgba(59,130,246,0.06)}
+.btn.active{background:var(--accent-soft);border-color:var(--accent)}
 .btn.cancel{background:#ef4444;color:#fff;border-color:#ef4444}
 
 /* Inputs */
-.search,.input,textarea,select{padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);transition:background-color .18s ease,color .18s ease,border-color .18s ease}
+.search,.input,textarea,select{padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text)}
 .search{width:320px;min-width:120px}
 
 /* Categories */
-.category-btn{display:block;width:100%;padding:10px;margin-bottom:6px;border:none;border-radius:12px;background:none;color:var(--text);text-align:left;cursor:pointer;border:1px solid transparent;transition:background-color .18s ease,transform .16s ease}
+.category-btn{display:block;width:100%;padding:10px;margin-bottom:6px;border:none;border-radius:12px;background:none;color:var(--text);text-align:left;cursor:pointer;border:1px solid transparent}
 .category-btn:hover{transform:translateX(4px);background:var(--hover);border-color:var(--border)}
 .category-btn.active{background:var(--accent-soft);border-color:var(--accent)}
 
 /* Grid & tiles */
-.grid{padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--tile),1fr));gap:var(--gap);overflow:auto;transition:all .18s ease}
-.tile{position:relative;background:var(--tile-bg);color:var(--tile-text);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-height:160px;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background-color .25s ease,opacity .18s ease}
+.grid{padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--tile),1fr));gap:var(--gap);overflow:auto}
+.tile{position:relative;background:var(--tile-bg);color:var(--tile-text);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-height:160px;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
 .tile:hover{transform:translateY(-3px);border-color:var(--accent)}
-.tile.selected{outline:2px solid var(--accent);background:var(--accent-soft);transform:translateY(-4px);transition:transform .16s ease,outline-color .16s ease,background-color .2s ease}
+.tile.selected{outline:2px solid var(--accent);background:var(--accent-soft);transform:translateY(-4px)}
 
-/* Content area: thumb and preview share same space */
+/* Content area */
 .contentArea{flex:1;position:relative;display:flex;align-items:center;justify-content:center;padding:12px;overflow:hidden}
 .thumb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:12px;transition:opacity .22s ease,transform .22s ease}
 .thumb img{width:100%;height:100%;object-fit:contain;background:transparent}
@@ -86,20 +75,13 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 /* Title anchored to bottom, centered horizontally, equal side padding */
 .title{padding:10px 12px;text-align:center;font-weight:600;margin-top:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-/* tile entrance animation */
-.tile { animation: tileIn .22s ease both; }
-@keyframes tileIn{
-  from{ opacity:0; transform:translateY(8px); }
-  to{ opacity:1; transform:translateY(0); }
-}
-
 /* Modal */
-.modalWrap{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;visibility:hidden;transition:opacity .18s ease,visibility .18s ease;display:flex;align-items:center;justify-content:center;z-index:300}
+.modalWrap{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;visibility:hidden;display:flex;align-items:center;justify-content:center;z-index:300;transition:opacity .18s ease,visibility .18s ease}
 .modalWrap.show{opacity:1;visibility:visible}
 .modal{width:min(980px,96vw);background:var(--card);padding:16px;border-radius:10px;border:1px solid var(--border);max-height:90vh;overflow:auto;transform:translateY(10px) scale(.98);opacity:0;transition:all .18s ease}
 .modalWrap.show .modal{transform:translateY(0) scale(1);opacity:1}
 
-/* Import preview table */
+/* Preview table */
 .previewTable{width:100%;border-collapse:collapse;margin-top:8px}
 .previewTable th, .previewTable td{border:1px solid var(--border);padding:6px;font-size:13px;text-align:left;background:var(--card);color:var(--text)}
 .mappingRow{display:flex;gap:8px;align-items:center;margin-top:8px}
@@ -109,8 +91,7 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 #__toast.show{opacity:1;transform:translateY(0)}
 
 /* Undo bar */
-.undoBar{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:rgba(0,0,0,0.85);color:#fff;padding:10px 14px;border-radius:8px;display:flex;gap:8px;align-items:center;z-index:9999;animation:toastIn .2s ease}
-@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.undoBar{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:rgba(0,0,0,0.85);color:#fff;padding:10px 14px;border-radius:8px;display:flex;gap:8px;align-items:center;z-index:9999}
 
 /* small visual feedback after copy */
 .tile.just-copied{box-shadow:0 6px 18px rgba(59,130,246,0.12);outline:2px solid rgba(59,130,246,0.18)}
@@ -134,7 +115,6 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 #hotkeysHUD.show{ opacity:1; transform:translateY(0); }
 #hotkeysHUD .keys{ font-weight:700; letter-spacing:0.6px; }
 
-/* Responsive */
 @media(max-width:900px){ .search{width:160px} .sidebar{width:200px} .modal{width:94vw} }
 </style>
 </head>
@@ -308,12 +288,12 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 
 <script>
 /*
-  Готовий index.html з:
-  - виправленим copy без повного ререндеру
-  - прев'ю імпорту з ручним мапінгом
-  - кнопкою Hotkeys + HUD (1–0 копіювання видимих шаблонів)
-  - відсутністю placeholder "Пусто"
-  - dark theme tokens та анімаціями
+  Полный index.html с:
+  - copyAndCount(id, silent)
+  - hotkeys 1-0 (HUD)
+  - экспорт JSON из localStorage (включая base64 images)
+  - превью импорта и ручной маппинг
+  - удаление пустых плиток
 */
 
 (function(){
@@ -541,7 +521,7 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   }
 
   // copy and count (patched): no full rerender, local update + storage
-  function copyAndCount(id){
+  function copyAndCount(id, silent=false){
     const t = templates.find(x=>x.id===id);
     if(!t) return;
 
@@ -559,7 +539,7 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
           setTimeout(()=> tileEl.classList.remove('just-copied'), 420);
         }
 
-        toast(`Скопійовано: «${t.title}»`);
+        if(!silent) toast(`Скопійовано: «${t.title}»`);
       }).catch(()=>{
         // fallback copy
         try{
@@ -578,7 +558,7 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
             tileEl.classList.add('just-copied');
             setTimeout(()=> tileEl.classList.remove('just-copied'), 420);
           }
-          toast(`Скопійовано: «${t.title}»`);
+          if(!silent) toast(`Скопійовано: «${t.title}»`);
         }catch(err){
           alert('Не вдалося скопіювати текст у буфер обміну.');
         }
@@ -601,7 +581,7 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
           tileEl.classList.add('just-copied');
           setTimeout(()=> tileEl.classList.remove('just-copied'), 420);
         }
-        toast(`Скопійовано: «${t.title}»`);
+        if(!silent) toast(`Скопійовано: «${t.title}»`);
       }catch(err){
         alert('Не вдалося скопіювати текст у буфер обміну.');
       }
@@ -717,9 +697,9 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   function hideUndoBar(){ const b = $('__undoBar'); if(b) b.remove(); }
 
   // IMPORT PREVIEW LOGIC
-  let previewRowsData = []; // array of arrays
-  let currentPreviewSource = null; // 'xlsx'|'csv'|'gsapi'|'json'
-  let currentPreviewMapping = null; // mapping object {colTitle: index, colCategory: index, colText: index, colTags: index, colEmoji: index, colImage: index}
+  let previewRowsData = [];
+  let currentPreviewSource = null;
+  let currentPreviewMapping = null;
   let previewFileName = '';
 
   function showImportModal(){ $('modalImport').classList.add('show'); $('modalImport').setAttribute('aria-hidden','false'); }
@@ -741,7 +721,6 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
     table.innerHTML = '';
     if(!rows || rows.length === 0) return;
     const cols = Math.max(...rows.map(r => r.length));
-    // header
     const thead = document.createElement('thead');
     const htr = document.createElement('tr');
     for(let c=0;c<cols;c++){
@@ -751,7 +730,6 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
     }
     thead.appendChild(htr);
     table.appendChild(thead);
-    // body
     const tbody = document.createElement('tbody');
     const previewCount = Math.min(rows.length, parseInt($('previewRows').value || '10'));
     for(let r=0;r<previewCount;r++){
@@ -771,7 +749,6 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   function buildMappingControls(cols){
     const wrap = $('mappingControls');
     wrap.innerHTML = '';
-    // columns list
     const fields = [
       {key:'title', label:'Title'},
       {key:'category', label:'Category'},
@@ -795,12 +772,10 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
         opt.textContent = 'Col ' + (i+1);
         sel.appendChild(opt);
       }
-      // allow "none"
       const noneOpt = document.createElement('option');
       noneOpt.value = '-1';
       noneOpt.textContent = '— none —';
       sel.insertBefore(noneOpt, sel.firstChild);
-      // set default if mapping exists
       if(currentPreviewMapping && typeof currentPreviewMapping[f.key] !== 'undefined'){
         sel.value = String(currentPreviewMapping[f.key] >= 0 ? currentPreviewMapping[f.key] : -1);
       } else {
@@ -840,7 +815,6 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
       const keys = ['title','category','text','tags','emoji','image'];
       selects.forEach((sel,i)=> { const val = parseInt(sel.value,10); mapping[keys[i]] = isNaN(val) ? -1 : val; });
 
-      // basic validation: at least title or text mapping must be set
       if(mapping.title < 0 && mapping.text < 0){ alert('Потрібно вказати колонку для Title або Text'); return; }
 
       const rows = previewRowsData.slice(0, Math.min(previewRowsData.length, 1000));
@@ -888,7 +862,6 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
     buildMappingControls(cols);
     renderPreviewTable(rows, currentPreviewMapping);
 
-    // bind confirm handler reliably (remove previous to avoid duplicates)
     const btn = $('btnConfirmImport');
     if(btn){
       btn.removeEventListener('click', confirmImportHandler);
@@ -988,7 +961,7 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
     }catch(err){ console.error(err); alert('Помилка Google Sheets API'); }
   });
 
-  // CSV direct import helper (kept)
+  // CSV direct import helper
   async function importCsvLinkDirect(url){
     if(!url) return;
     try{
@@ -1020,7 +993,7 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
     }catch(err){ console.error(err); alert('Помилка імпорту CSV'); }
   }
 
-  // hidden input handler for XLSX/JSON direct import (backwards compat)
+  // hidden input handler for XLSX/JSON direct import
   safeOn($('xlsxImport'), 'change', (e)=>{
     const file = e.target.files && e.target.files[0];
     if(!file) return;
@@ -1074,13 +1047,10 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 
   // import modal bindings
   safeOn($('btnOpenImport'), 'click', ()=>{ showImportModal(); });
-  safeOn($('btnImportClose'), 'click', ()=>{ hideImportModal(); });
+  safeOn($('btnTriggerImport'), 'click', ()=> $('xlsxImport').click());
   safeOn($('btnLoadFilePreview'), 'click', ()=>{ /* handled above */ });
   safeOn($('btnLoadCsvPreview'), 'click', ()=>{ /* handled above */ });
   safeOn($('btnLoadGsApiPreview'), 'click', ()=>{ /* handled above */ });
-
-  // hidden input trigger
-  safeOn($('btnTriggerImport'), 'click', ()=> $('xlsxImport').click());
 
   // background handlers
   safeOn($('btnChangeBg'), 'click', ()=>{ $('modalBg').classList.add('show'); $('modalBg').setAttribute('aria-hidden','false'); });
@@ -1101,13 +1071,13 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   safeOn($('btnDeleteSelected'), 'click', ()=> deleteSelected());
   safeOn($('btnEditSelected'), 'click', ()=> { if(window.selectedTiles.length !== 1){ alert('Виберіть один шаблон'); return; } openEditor(window.selectedTiles[0]); });
 
-  // export
-  safeOn($('btnExport'), 'click', ()=>{ const data = JSON.stringify(templates,null,2); const blob = new Blob([data],{type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='templates.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),1000); });
+  // export (reads from localStorage to include all templates and base64 images)
+  safeOn($('btnExport'), 'click', ()=>{ try{ const all = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); const data = JSON.stringify(all,null,2); const blob = new Blob([data],{type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='templates.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),1000); }catch(err){ console.error('Export error', err); alert('Не вдалося експортувати JSON'); } });
 
   // search
   safeOn($('search'), 'input', ()=> { clearSelection(); renderTemplates(); });
 
-  // keyboard quick copy (1-0) handled by hotkeys module below
+  // keyboard quick copy handled by hotkeys module below
 
   // storage sync
   window.addEventListener('storage', (e)=>{ if(e.key === STORAGE_KEY){ try{ const parsed = JSON.parse(e.newValue); if(Array.isArray(parsed)){ templates = parsed.map(ensureShape); renderTemplates(); } }catch(err){ console.warn(err); } } if(e.key === CATEGORY_ORDER_KEY){ try{ const parsed = JSON.parse(e.newValue); if(Array.isArray(parsed)){ categoryOrder = parsed; renderCategories(); } }catch(err){ console.warn(err); } } if(e.key === BG_KEY){ const bg = localStorage.getItem(BG_KEY); $('mainArea').style.backgroundImage = bg ? `url(${bg})` : ''; } });
@@ -1154,13 +1124,11 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   function init(){
     const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
     if(savedTheme === 'dark') document.body.classList.add('dark'); else document.body.classList.remove('dark');
-    // theme toggle
     safeOn($('btnTheme'), 'click', ()=> {
       const isDark = document.body.classList.toggle('dark');
       localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
     });
 
-    // zoomRange initial value
     const zoomRange = $('zoomRange');
     if(zoomRange){
       const base = 220;
@@ -1170,7 +1138,6 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
       zoomRange.addEventListener('input', (e)=>{ const base=220; let w=Math.round(base * parseFloat(e.target.value)); const min=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tile-min'))||160; const max=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tile-max'))||360; if(w<min) w=min; if(w>max) w=max; document.documentElement.style.setProperty('--tile', w+'px'); localStorage.setItem(UI_TILE_KEY, String(w)); setTimeout(()=>renderTemplates(),120); });
     }
 
-    // restore bg
     const savedBg = localStorage.getItem(BG_KEY);
     if(savedBg) $('mainArea').style.backgroundImage = `url(${savedBg})`;
 
@@ -1182,9 +1149,8 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   // helper autoFix used earlier
   function autoFix(text){ if(!text) return ''; return String(text).replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim(); }
 
-  // Expose some functions for debugging
+  // Expose for debug
   window.templates = templates;
-  window.confirmImportHandler = confirmImportHandler;
   window.importCsvLink = importCsvLinkDirect;
 
   // ---------------------------
@@ -1215,7 +1181,7 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
         if(idx < 0 || idx >= list.length){ showHotkeysHUD('Індекс поза діапазоном'); return; }
         const id = list[idx].id;
         if(typeof copyAndCount === 'function'){
-          copyAndCount(id);
+          copyAndCount(id, true);
           showHotkeysHUD(`Скопійовано: «${list[idx].title || 'Без назви'}»`, 900);
         } else {
           console.warn('copyAndCount не знайдено');
