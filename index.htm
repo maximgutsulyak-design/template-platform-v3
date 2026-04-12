@@ -8,6 +8,7 @@
 :root{
   --bg:#ffffff;
   --panel:#f9fafb;
+  --panel-sidebar:#e4e4e5;
   --card:#ffffff;
   --text:#111827;
   --muted:#6b7280;
@@ -17,6 +18,12 @@
   --tile-text:#111827;
   --accent:#3b82f6;
   --accent-soft:rgba(59,130,246,0.15);
+  --theme-toggle-bg:rgba(15,23,42,0.08);
+  --btn-border:#d1d5db;
+  --btn-primary-bg:#4154A3;
+  --btn-primary-text:#ffffff;
+  --btn-warning-bg:#EAB500;
+  --btn-warning-text:#000000;
   --tile:220px;
   --tile-min:160px;
   --tile-max:360px;
@@ -25,6 +32,7 @@
 body.dark{
   --bg:#212121;
   --panel:#171717;
+  --panel-sidebar:var(--panel);
   --card:#2a2a2a;
   --text:#ececec;
   --muted:#a1a1aa;
@@ -34,18 +42,22 @@ body.dark{
   --tile-text:#f5f5f5;
   --accent:#3b82f6;
   --accent-soft:rgba(59,130,246,0.2);
+  --theme-toggle-bg:rgba(15,23,42,0.08);
+  --btn-border:#4b5563;
+  --btn-primary-bg:#EAB500;
+  --btn-primary-text:#000000;
+  --btn-warning-bg:#4154A3;
+  --btn-warning-text:#ffffff;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);transition:background-color .25s ease,color .25s ease}
 .app{display:flex;height:100vh}
-.sidebar{width:260px;background:var(--panel);border-right:1px solid var(--border);padding:14px;overflow:auto;display:flex;flex-direction:column;gap:12px}
+.sidebar{width:260px;background:var(--panel-sidebar);border-right:1px solid var(--border);padding:14px;overflow:auto;display:flex;flex-direction:column;gap:12px}
 .main{flex:1;display:flex;flex-direction:column;background-position:center;background-repeat:no-repeat;background-size:cover;background-color:var(--bg)}
 .topbar{display:flex;gap:10px;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--border);align-items:center;z-index:120}
 
 /* Buttons */
-.btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;user-select:none;transition:background-color .18s ease}
-.btn:hover{background:var(--hover)}
 .btn.active{background:var(--accent-soft);border-color:var(--accent)}
 .btn.cancel{background:#ef4444;color:#fff;border-color:#ef4444}
 
@@ -54,9 +66,15 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 .search{width:320px;min-width:120px}
 
 /* Categories */
-.category-btn{display:block;width:100%;padding:10px;margin-bottom:6px;border:none;border-radius:12px;background:none;color:var(--text);text-align:left;cursor:pointer;border:1px solid transparent}
-.category-btn:hover{transform:translateX(4px);background:var(--hover);border-color:var(--border)}
+.category-btn{display:block;width:100%;padding:10px;margin-bottom:6px;border:none;border-radius:12px;background:none;color:var(--text);text-align:left;cursor:pointer;border:1px solid transparent;transition:background-color .18s ease, transform .18s ease;}
+.category-btn:hover{transform:translateX(2px);background:var(--hover);border-color:var(--border)}
 .category-btn.active{background:var(--accent-soft);border-color:var(--accent)}
+.category-group{display:block}
+.category-child-wrap{overflow:hidden;max-height:0;transition:max-height .35s ease, opacity .35s ease, padding .35s ease;opacity:0;padding-top:0;}
+.category-group.open .category-child-wrap{max-height:420px;opacity:1;padding-top:6px;}
+.category-child-wrap .category-btn{padding-left:24px;}
+.topbar{display:flex;gap:10px;padding:16px 18px;background:var(--panel-sidebar);border-bottom:1px solid var(--border);align-items:center;z-index:120;min-height:66px;}
+.logo{height:44px;width:auto;object-fit:contain;}
 
 /* Grid & tiles */
 .grid{padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--tile),1fr));gap:var(--gap);overflow:auto}
@@ -78,10 +96,21 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 /* Modal */
 .modalWrap{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;visibility:hidden;display:flex;align-items:center;justify-content:center;z-index:300;transition:opacity .18s ease,visibility .18s ease}
 .modalWrap.show{opacity:1;visibility:visible}
-.modal{width:min(980px,96vw);background:var(--card);padding:16px;border-radius:10px;border:1px solid var(--border);max-height:90vh;overflow:auto;transform:translateY(10px) scale(.98);opacity:0;transition:all .18s ease}
+.modal{width:min(760px,96vw);background:var(--card);padding:20px;border-radius:14px;border:1px solid var(--border);max-height:90vh;overflow:auto;transform:translateY(10px) scale(.98);opacity:0;position:relative;transition:all .18s ease}
 .modalWrap.show .modal{transform:translateY(0) scale(1);opacity:1}
-
-/* Preview table */
+.modal-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.modal-header h3{margin:0;font-size:20px}
+.close-btn{min-width:auto;padding:10px 12px;font-size:16px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:var(--text)}
+.modal-note{margin:6px 0 0;color:var(--muted);font-size:14px;line-height:1.5;opacity:.78}
+.import-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.import-panel{display:flex;flex-direction:column;gap:10px;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--card)}
+.import-panel .panel-title{margin:0;font-size:13px;font-weight:700;color:var(--text)}
+.import-panel input, .import-panel input[type=file]{width:100%}
+.import-panel .btn.full{width:100%;justify-content:center}
+.import-actions{display:flex;gap:10px;flex-wrap:wrap}
+.export-panel{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--card);margin-bottom:14px}
+.export-panel .hint{margin:0;color:var(--muted);font-size:13px}
+@media(max-width:760px){.modal{width:94vw}.import-grid{grid-template-columns:1fr}}
 .previewTable{width:100%;border-collapse:collapse;margin-top:8px}
 .previewTable th, .previewTable td{border:1px solid var(--border);padding:6px;font-size:13px;text-align:left;background:var(--card);color:var(--text)}
 .mappingRow{display:flex;gap:8px;align-items:center;margin-top:8px}
@@ -114,49 +143,209 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 }
 #hotkeysHUD.show{ opacity:1; transform:translateY(0); }
 #hotkeysHUD .keys{ font-weight:700; letter-spacing:0.6px; }
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 12px;
+  border-radius:10px;
+  border:1px solid var(--btn-border);
+  background:var(--card);
+  color:var(--text);
+  cursor:pointer;
+  user-select:none;
+  transition:background-color .18s ease,color .18s ease,transform .18s ease,opacity .18s ease;
+}
+
+.btn:hover{
+  transform: translateY(-1px);
+  opacity: 0.93;
+}
+
+.btn.theme-toggle{
+  width:52px;
+  min-width:52px;
+  height:32px;
+  padding:0;
+  border-radius:999px;
+  position:relative;
+  background:transparent;
+  border-color:var(--border);
+}
+.btn.theme-toggle::before{
+  content:'';
+  position:absolute;
+  top:4px;
+  bottom:4px;
+  left:4px;
+  right:4px;
+  border-radius:999px;
+  background:var(--theme-toggle-bg);
+  transition:background .2s ease;
+}
+.btn.theme-toggle::after{
+  content:'☀︎';
+  position:absolute;
+  width:20px;
+  height:20px;
+  top:50%;
+  left:6px;
+  transform:translateY(-50%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:var(--card);
+  color:var(--text);
+  font-size:12px;
+  transition:left .2s ease, background .2s ease, color .2s ease;
+}
+body.dark .btn.theme-toggle::after{
+  content:'🌙';
+  left:calc(100% - 26px);
+}
+body.dark .btn.theme-toggle::before{
+  background:rgba(255,255,255,0.14);
+}
+
+.btn.icon-btn{
+  width:42px;
+  min-width:42px;
+  height:42px;
+  padding:0;
+  border-radius:50%;
+  position:relative;
+}
+
+.btn.icon-btn::before{
+  content:'';
+  position:absolute;
+  inset:12px;
+  border-radius:50%;
+  box-shadow:0 -4px 0 0 currentColor, 0 4px 0 0 currentColor, -4px 0 0 0 currentColor, 4px 0 0 0 currentColor;
+}
+
+.btn.icon-btn::after{
+  content:'';
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:currentColor;
+  transform:translate(-50%, -50%);
+}
+
+.btn.primary{
+  background:var(--btn-primary-bg);
+  color:var(--btn-primary-text);
+  border-color:transparent;
+}
+
+.btn.primary:hover{
+  filter:brightness(1.05);
+}
+
+.btn.warning{
+  background:var(--btn-warning-bg);
+  color:var(--btn-warning-text);
+  border-color:transparent;
+}
+
+.btn.warning:hover{
+  filter:brightness(1.05);
+}
+::-webkit-scrollbar{
+  width:10px;
+  height:10px;
+}
+
+::-webkit-scrollbar-track{
+  background:transparent;
+}
+
+::-webkit-scrollbar-thumb{
+  background:rgba(120,120,120,0.26);
+  border-radius:999px;
+  border:3px solid transparent;
+  background-clip:padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover{
+  background:rgba(120,120,120,0.4);
+}
+
+::-webkit-scrollbar-corner{
+  background:transparent;
+}
+.logo{
+  max-height:48px;
+  width:auto;
+  height:auto;
+  object-fit:contain;
+  cursor:default;
+  user-select:none;
+  pointer-events:none;
+}
+.sidebar-logo{display:flex;justify-content:center;align-items:center;padding:18px 0 16px;margin-bottom:14px}
+.sidebar-logo .logo{max-height:52px;max-width:100%;height:auto;width:auto;}
+.tile.pinned{border-color:var(--btn-warning-bg);box-shadow:0 0 0 1px rgba(234,181,0,0.35);}
+.tile-badge{position:absolute;top:10px;right:10px;padding:4px 8px;font-size:11px;font-weight:700;color:var(--btn-warning-text);background:var(--btn-warning-bg);border-radius:999px;display:flex;align-items:center;gap:4px;}
+.tile-badge + .tile-badge{top:34px;}
+.tile-badge.favorite{background:rgba(59,130,246,0.95);color:#fff;}
+.tile-badge.pinned{background:var(--btn-warning-bg);color:var(--btn-warning-text);}
+.context-menu{position:fixed;z-index:9999;min-width:180px;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,0.16);padding:6px 0;display:none}
+.context-menu.show{display:block}
+.context-menu button{width:100%;text-align:left;padding:10px 14px;border:none;background:none;color:var(--text);cursor:pointer;font-size:14px}
+.context-menu button:hover{background:var(--hover)}
+.topbar{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
 
 @media(max-width:900px){ .search{width:160px} .sidebar{width:200px} .modal{width:94vw} }
+.settings-panel{display:flex;flex-direction:column;gap:16px}
+.settings-group{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--border)}
+.settings-group label{font-weight:700;color:var(--text);}
+.settings-group .hint{font-size:13px;color:var(--muted);}
+.settings-slider{width:100%;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.settings-row span{font-size:14px;color:var(--text);}
 </style>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div style="font-weight:700;font-size:18px">Шаблони</div>
-
-    <div>
-      <label class="small">Масштаб плиток</label>
-      <input id="zoomRange" type="range" min="0.7" max="1.6" step="0.05" value="1" style="width:100%" />
+    <div class="sidebar-logo">
+      <img id="logo" src="light_theme.png" class="logo" draggable="false" ondragstart="return false;" oncontextmenu="return false;">
     </div>
-
-    <div style="display:flex;gap:8px">
-      <button id="btnTheme" class="btn">Тема</button>
-      <button id="btnOpenImport" class="btn">Імпорт</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <!-- theme toggle moved to topbar -->
     </div>
-
-    <div id="categoryList" style="display:flex;flex-direction:column;gap:6px"></div>
-
-    <div style="margin-top:auto">
-      <button id="btnExport" class="btn" style="width:100%">Експорт JSON</button>
-    </div>
+    <div id="categoryList" style="display:flex;flex-direction:column;gap:6px;margin-top:12px"></div>
   </aside>
 
   <main class="main" id="mainArea">
     <div class="topbar">
-      <input id="search" class="search" placeholder="Пошук..." />
+      <input id="search" class="search" placeholder="Пошук по всім категоріям..." />
+      <button id="clearSearch" class="btn">✕</button>
+      <button id="btnSettings" type="button" class="btn icon-btn" aria-label="Налаштування">⚙️</button>
       <div style="display:flex;gap:8px;margin-left:8px">
         <button id="btnAdd" class="btn">Додати</button>
         <button id="btnEditMode" class="btn">Редагування</button>
-        <button id="btnSelectAll" class="btn">Виділити все</button>
-        <button id="btnDeleteSelected" class="btn">Видалити</button>
+        <button id="btnSelectAll" class="btn" style="display:none">Виділити все</button>
+        <button id="btnDeleteSelected" class="btn" style="display:none">Видалити</button>
         <button id="btnEditSelected" class="btn" style="display:none">Редагувати</button>
         <button id="btnCancelSelection" class="btn cancel" style="display:none">Скасувати</button>
       </div>
       <div style="flex:1"></div>
-      <div style="display:flex;gap:8px">
-        <button id="btnChangeBg" class="btn">Фон</button>
-        <button id="btnTriggerImport" class="btn">Імпортувати файл</button>
-        <button id="btnHotkeys" class="btn" title="Гарячі клавіші 1–0">Hotkeys</button>
-        <input id="xlsxImport" type="file" accept=".xlsx,.xls,.json" style="display:none" />
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="btnTheme" class="btn theme-toggle" aria-label="Тема"></button>
+        <button id="btnImportExport" class="btn">Імпорт / Експорт</button>
+        <button id="btnHotkeys" class="btn warning" title="Гарячі клавіші 1–0">Hotkeys</button>
       </div>
     </div>
 
@@ -169,6 +358,36 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 
 <!-- Hotkeys HUD -->
 <div id="hotkeysHUD" aria-hidden="true"><span class="keys">1–0</span> — копіювати видимі шаблони</div>
+<div id="tileContextMenu" class="context-menu" aria-hidden="true"></div>
+
+<!-- Settings modal -->
+  <div class="modal" role="dialog">
+    <div class="modal-header">
+      <div>
+        <h2>Налаштування</h2>
+        <p class="modal-note">Швидко налаштуйте фон та масштаб карток для зручнішої роботи.</p>
+      </div>
+      <button id="btnCloseSettings" class="btn close-btn">×</button>
+    </div>
+    <div class="settings-panel">
+      <div class="settings-group">
+        <div class="settings-row"><span>Фон</span></div>
+        <input id="bgFile" type="file" accept="image/*" />
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+          <button id="bgApply" class="btn">Застосувати</button>
+          <button id="bgClear" class="btn">Очистити</button>
+        </div>
+        <div class="hint">Завантажте зображення, PNG з прозорістю збережеться прозорим.</div>
+        <div id="bgStatus" class="small" style="margin-top:8px"></div>
+      </div>
+      <div class="settings-group">
+        <div class="settings-row"><span>Масштаб плиток</span><span id="zoomValue">100%</span></div>
+        <input id="zoomRange" class="settings-slider" type="range" min="0.7" max="1.6" step="0.05" value="1" />
+        <div class="hint">Регулюйте розмір карток для зручного перегляду.</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Editor modal -->
 <div id="modalEditor" class="modalWrap" aria-hidden="true">
@@ -206,26 +425,35 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 <!-- Import modal with preview -->
 <div id="modalImport" class="modalWrap" aria-hidden="true">
   <div class="modal" role="dialog">
-    <h3>Імпорт шаблонів — прев’ю</h3>
-    <div class="note">Оберіть файл (JSON/XLSX) або вставте CSV link. Після завантаження побачите перші рядки і зможете вибрати мапінг колонок перед підтвердженням.</div>
+    <div class="modal-header">
+      <h3>Імпорт / Експорт</h3>
+      <button id="btnImportClose" class="btn close-btn" aria-label="Закрити">×</button>
+    </div>
+    <p class="modal-note">Імпортуйте з JSON/XLSX або CSV, експортуйте в JSON.</p>
 
-    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">
-      <div style="flex:1;min-width:320px">
-        <div class="small" style="margin-bottom:6px">Файл (JSON/XLSX)</div>
+    <div class="import-grid">
+      <div class="import-panel">
+        <div class="panel-title">Файл (JSON/XLSX)</div>
         <input id="importFile" type="file" accept=".json,.xlsx,.xls" />
-        <div style="margin-top:8px"><button id="btnLoadFilePreview" class="btn">Завантажити і показати прев’ю</button></div>
+        <button id="btnLoadFilePreview" class="btn full">Переглянути</button>
       </div>
 
-      <div style="flex:1;min-width:320px">
-        <div class="small" style="margin-bottom:6px">Google Sheets (CSV link)</div>
-        <input id="gsCsvLink" class="input" placeholder="CSV link (export?format=csv)" style="width:100%;margin-bottom:8px" />
-        <div style="margin-bottom:8px"><button id="btnLoadCsvPreview" class="btn">Завантажити CSV і показати прев’ю</button></div>
-
-        <div class="small" style="margin-bottom:6px">Google Sheets API (Spreadsheet ID + API Key)</div>
-        <input id="gsSpreadsheetId" class="input" placeholder="Spreadsheet ID" style="width:100%;margin-bottom:8px" />
-        <input id="gsApiKey" class="input" placeholder="API Key" style="width:100%" />
-        <div style="margin-top:8px"><button id="btnLoadGsApiPreview" class="btn">Завантажити через API і показати прев’ю</button></div>
+      <div class="import-panel">
+        <div class="panel-title">CSV</div>
+        <input id="gsCsvLink" class="input" placeholder="CSV link" />
+        <div class="import-actions">
+          <button id="btnLoadCsvPreview" class="btn">Переглянути</button>
+          <button id="btnAutoImport" class="btn primary">Автоімпорт</button>
+        </div>
       </div>
+    </div>
+
+    <div class="export-panel">
+      <div>
+        <div class="panel-title">Експорт</div>
+        <div class="hint">Завантажте всі шаблони у JSON.</div>
+      </div>
+      <button id="btnExportJson" class="btn">Експорт JSON</button>
     </div>
 
     <div id="previewArea" style="display:none;margin-top:8px">
@@ -256,28 +484,7 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
       </div>
     </div>
 
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button id="btnImportClose" class="btn">Закрити</button>
-    </div>
-
     <div id="importStatus" class="small" style="margin-top:8px;color:var(--muted)"></div>
-  </div>
-</div>
-
-<!-- Background modal -->
-<div id="modalBg" class="modalWrap" aria-hidden="true">
-  <div class="modal" role="dialog">
-    <h3>Фон</h3>
-    <div class="note">Завантажте зображення — PNG з прозорістю збережеться прозорим.</div>
-    <div style="display:flex;gap:8px;margin-bottom:8px">
-      <input id="bgFile" type="file" accept="image/*" />
-    </div>
-    <div style="display:flex;gap:8px">
-      <button id="bgApply" class="btn">Застосувати</button>
-      <button id="bgClose" class="btn">Закрити</button>
-      <button id="bgClear" class="btn">Очистити</button>
-    </div>
-    <div id="bgStatus" class="small" style="margin-top:8px"></div>
   </div>
 </div>
 
@@ -320,6 +527,7 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
       emoji: (item.emoji || item.Emoji || '').toString().slice(0,4),
       image: (item.image || item['Image URL'] || '').toString().trim(),
       favorite: Boolean(item.favorite || false),
+      pinned: Boolean(item.pinned || false),
       usage: Number(item.usage || 0),
       updatedAt: Number(item.updatedAt || Date.now())
     };
@@ -334,6 +542,7 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   let categoryOrder = JSON.parse(localStorage.getItem(CATEGORY_ORDER_KEY) || 'null') || Array.from(new Set(templates.map(t=>t.category)));
   let currentCategory = 'Усі';
   let editMode = false;
+  let openCategories = new Set();
   window.selectedTiles = [];
   let lastSelectedIndex = null;
   let editingId = null;
@@ -358,8 +567,14 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 
   // UI sync
   function syncSelectionUI(){
-    $('btnCancelSelection').style.display = window.selectedTiles.length ? 'inline-flex' : 'none';
-    $('btnEditSelected').style.display = (window.selectedTiles.length === 1 && editMode) ? 'inline-flex' : 'none';
+    const selectAllBtn = $('btnSelectAll');
+    const deleteBtn = $('btnDeleteSelected');
+    const editSelectedBtn = $('btnEditSelected');
+    const cancelBtn = $('btnCancelSelection');
+    if(selectAllBtn) selectAllBtn.style.display = editMode ? 'inline-flex' : 'none';
+    if(deleteBtn) deleteBtn.style.display = (editMode && window.selectedTiles.length) ? 'inline-flex' : 'none';
+    if(editSelectedBtn) editSelectedBtn.style.display = (editMode && window.selectedTiles.length === 1) ? 'inline-flex' : 'none';
+    if(cancelBtn) cancelBtn.style.display = (editMode && window.selectedTiles.length) ? 'inline-flex' : 'none';
   }
 
   // selection helpers
@@ -386,8 +601,22 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   // filtered
   function filtered(){
     const q = ($('search')?.value || '').trim().toLowerCase();
-    return templates.filter(t => currentCategory === 'Усі' ? true : currentCategory === '📌 Обране' ? t.favorite : t.category === currentCategory)
-      .filter(t => !q || (t.title + ' ' + t.text + ' ' + (t.tags||[]).join(' ')).toLowerCase().includes(q));
+    const matchesSearch = (t) => {
+      if(!q) return true;
+      const field = (t.title + ' ' + t.text + ' ' + (t.tags||[]).join(' ') + ' ' + t.category + ' ' + (t.emoji||'')).toLowerCase();
+      return field.includes(q);
+    };
+    if(q){
+      const results = templates.filter(matchesSearch);
+      if(currentCategory === '📌 Обране') return results.filter(t => t.favorite);
+      return results;
+    }
+    return templates.filter(t => {
+      if(currentCategory === 'Усі') return true;
+      if(currentCategory === '📌 Обране') return t.favorite;
+      if(currentCategory.includes('/')) return t.category === currentCategory;
+      return t.category === currentCategory || t.category.startsWith(currentCategory + '/');
+    });
   }
 
   // build tile
@@ -427,7 +656,35 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
     title.textContent = t.title || 'Без назви';
     tile.appendChild(title);
 
+    if(t.favorite){
+      const favBadge = document.createElement('div');
+      favBadge.className = 'tile-badge favorite';
+      favBadge.textContent = '★';
+      tile.appendChild(favBadge);
+    }
+
+    if(t.pinned){
+      const pinBadge = document.createElement('div');
+      pinBadge.className = 'tile-badge pinned';
+      pinBadge.textContent = '📌';
+      tile.appendChild(pinBadge);
+      tile.classList.add('pinned');
+    }
+
+    tile.addEventListener('contextmenu', (ev)=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+      openTileContextMenu(ev, t);
+    });
+
     // Patched click handler: prevent default/navigation and avoid full rerender on copy
+    tile.addEventListener('dblclick', (ev)=>{
+      if(!editMode) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      openEditor(t.id);
+    });
+
     tile.addEventListener('click', (ev)=>{
       ev.preventDefault();
       ev.stopPropagation();
@@ -507,18 +764,92 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
     if(!window.Sortable) return;
     sortableTemplates = Sortable.create(grid, {
       animation: 150,
+      draggable: '.tile:not(.pinned)',
       handle: '.tile',
       onEnd: (evt) => {
         const ids = Array.from(grid.children).map(ch => ch.dataset && ch.dataset.id ? ch.dataset.id : null).filter(Boolean);
+        const pinnedItems = templates.filter(t => t.pinned);
+        const unpinnedItems = templates.filter(t => !t.pinned);
+        const orderedUnpinnedIds = ids.filter(id => {
+          const t = templates.find(x=>x.id===id);
+          return t && !t.pinned;
+        });
+        const remainingUnpinned = unpinnedItems.filter(t => !orderedUnpinnedIds.includes(t.id));
+        const orderedUnpinned = orderedUnpinnedIds.map(id => unpinnedItems.find(t=>t.id===id)).filter(Boolean).concat(remainingUnpinned);
+
         const newTemplates = [];
-        ids.forEach(id => { const t = templates.find(x=>x.id===id); if(t) newTemplates.push(t); });
-        templates.forEach(t => { if(!newTemplates.find(x=>x.id===t.id)) newTemplates.push(t); });
+        let nextUnpinned = 0;
+        for(let i=0;i<templates.length;i++){
+          const original = templates[i];
+          if(original.pinned){
+            newTemplates.push(original);
+          } else {
+            newTemplates.push(orderedUnpinned[nextUnpinned++] || original);
+          }
+        }
+
         templates = newTemplates;
         persist();
         renderTemplates();
       }
     });
   }
+
+  function closeTileContextMenu(){
+    const menu = $('tileContextMenu');
+    if(menu){
+      menu.classList.remove('show');
+      menu.setAttribute('aria-hidden','true');
+      menu.innerHTML = '';
+    }
+  }
+
+  function openTileContextMenu(ev, template){
+    closeTileContextMenu();
+    const menu = $('tileContextMenu');
+    if(!menu) return;
+    const favoriteLabel = template.favorite ? 'Видалити з обраного' : 'Додати до обраного';
+    const pinLabel = template.pinned ? 'Відкріпити позицію' : 'Закріпити позицію';
+    menu.innerHTML = '';
+
+    const addFav = document.createElement('button');
+    addFav.type = 'button';
+    addFav.textContent = favoriteLabel;
+    addFav.onclick = (e) => { e.stopPropagation(); toggleFavorite(template.id); closeTileContextMenu(); };
+    menu.appendChild(addFav);
+
+    const addPin = document.createElement('button');
+    addPin.type = 'button';
+    addPin.textContent = pinLabel;
+    addPin.onclick = (e) => { e.stopPropagation(); togglePin(template.id); closeTileContextMenu(); };
+    menu.appendChild(addPin);
+
+    menu.classList.add('show');
+    menu.setAttribute('aria-hidden','false');
+    const x = Math.min(ev.clientX, window.innerWidth - menu.offsetWidth - 12);
+    const y = Math.min(ev.clientY, window.innerHeight - menu.offsetHeight - 12);
+    menu.style.left = Math.max(12, x) + 'px';
+    menu.style.top = Math.max(12, y) + 'px';
+  }
+
+  function toggleFavorite(id){
+    const t = templates.find(x=>x.id===id);
+    if(!t) return;
+    t.favorite = !t.favorite;
+    persist();
+    renderTemplates();
+  }
+
+  function togglePin(id){
+    const t = templates.find(x=>x.id===id);
+    if(!t) return;
+    t.pinned = !t.pinned;
+    persist();
+    renderTemplates();
+  }
+
+  document.addEventListener('click', () => closeTileContextMenu());
+  document.addEventListener('scroll', () => closeTileContextMenu(), true);
 
   // copy and count (patched): no full rerender, local update + storage
   function copyAndCount(id, silent=false){
@@ -937,30 +1268,6 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
     }catch(err){ console.error(err); alert('Помилка завантаження CSV'); }
   });
 
-  // Google Sheets API preview
-  safeOn($('btnLoadGsApiPreview'), 'click', async ()=>{
-    const id = $('gsSpreadsheetId').value.trim();
-    const key = $('gsApiKey').value.trim();
-    if(!id || !key){ alert('Вкажіть Spreadsheet ID та API Key'); return; }
-    try{
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(id)}?includeGridData=true&key=${encodeURIComponent(key)}`;
-      const res = await fetch(url);
-      if(!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      if(!Array.isArray(data.sheets) || !data.sheets.length){ alert('Не знайдено листів'); return; }
-      const sheet = data.sheets[0];
-      const rows = (sheet.data && sheet.data[0] && sheet.data[0].rowData) ? sheet.data[0].rowData.map(r => (r.values||[]).map(c => c && c.formattedValue ? c.formattedValue : '')) : [];
-      previewRowsData = rows.slice(0,200);
-      currentPreviewSource = 'gsapi';
-      currentPreviewMapping = { title:0, text:1, tags:2, emoji:3, image:4, category:5 };
-      if(rows[0] && rows[0].some(c => typeof c === 'string' && /title|category|text|tags|image|emoji/i.test(String(c)))){
-        const headerMap = detectMappingFromHeader(rows[0]);
-        currentPreviewMapping = Object.assign({category:-1,title:-1,text:-1,tags:-1,emoji:-1,image:-1}, headerMap);
-      }
-      showPreviewUI();
-    }catch(err){ console.error(err); alert('Помилка Google Sheets API'); }
-  });
-
   // CSV direct import helper
   async function importCsvLinkDirect(url){
     if(!url) return;
@@ -993,70 +1300,17 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
     }catch(err){ console.error(err); alert('Помилка імпорту CSV'); }
   }
 
-  // hidden input handler for XLSX/JSON direct import
-  safeOn($('xlsxImport'), 'change', (e)=>{
-    const file = e.target.files && e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const data = new Uint8Array(ev.target.result);
-      const name = file.name.toLowerCase();
-      if(name.endsWith('.json')){
-        try{
-          const parsed = JSON.parse(new TextDecoder().decode(data));
-          if(Array.isArray(parsed)){
-            const shaped = parsed.map(p=>ensureShape(p));
-            templates = [...shaped, ...templates];
-            shaped.forEach(s=>{ if(s.category && !categoryOrder.includes(s.category)) categoryOrder.push(s.category); });
-            persist(); renderTemplates(); toast('JSON імпортовано');
-          } else alert('JSON має бути масивом шаблонів');
-        }catch(err){ alert('JSON пошкоджений'); console.error(err); }
-        e.target.value = ''; return;
-      }
-      try{
-        const wb = XLSX.read(data, { type:'array' });
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
-        let startIndex = 0;
-        const firstRow = (rows[0] || []).map(c => String(c||'').toLowerCase());
-        if(firstRow.some(h => ['category','title','text','tags','image'].includes(h))) startIndex = 1;
-        const templatesFromSheet = [];
-        for(let r = startIndex; r < rows.length; r++){
-          const row = rows[r] || [];
-          const category = (row[0]||'').toString().trim() || wb.SheetNames[0] || 'Без категорії';
-          const title = (row[1]||'').toString().trim();
-          const text = (row[2]||'').toString().trim();
-          const tagsRaw = (row[3]||'').toString().trim();
-          const image = (row[4]||'').toString().trim();
-          if(!title && !text) continue;
-          const tags = tagsRaw ? tagsRaw.split(/[,;]+/).map(t=>t.trim()).filter(Boolean) : [];
-          templatesFromSheet.push({ title, category, text: autoFix(text), tags, image });
-        }
-        templatesFromSheet.forEach(t => {
-          const shaped = ensureShape(t);
-          const exists = templates.some(existing => existing.title === shaped.title && existing.text === shaped.text && existing.category === shaped.category);
-          if(!exists) templates.push(shaped);
-          if(!categoryOrder.includes(shaped.category)) categoryOrder.push(shaped.category);
-        });
-        persist(); renderTemplates(); toast('Excel імпортовано (A=Category,B=Title,C=Text,D=Tags,E=Image)');
-      }catch(err){ console.error('XLSX import error', err); alert('Помилка імпорту XLSX'); }
-    };
-    reader.readAsArrayBuffer(file);
-    e.target.value = '';
-  });
-
   // import modal bindings
-  safeOn($('btnOpenImport'), 'click', ()=>{ showImportModal(); });
-  safeOn($('btnTriggerImport'), 'click', ()=> $('xlsxImport').click());
+  safeOn($('btnImportExport'), 'click', ()=>{ showImportModal(); });
   safeOn($('btnLoadFilePreview'), 'click', ()=>{ /* handled above */ });
   safeOn($('btnLoadCsvPreview'), 'click', ()=>{ /* handled above */ });
-  safeOn($('btnLoadGsApiPreview'), 'click', ()=>{ /* handled above */ });
 
-  // background handlers
-  safeOn($('btnChangeBg'), 'click', ()=>{ $('modalBg').classList.add('show'); $('modalBg').setAttribute('aria-hidden','false'); });
-  safeOn($('bgClose'), 'click', ()=>{ $('modalBg').classList.remove('show'); $('modalBg').setAttribute('aria-hidden','true'); });
+  // background handlers inside settings modal
   safeOn($('bgClear'), 'click', ()=>{ $('mainArea').style.backgroundImage=''; localStorage.removeItem(BG_KEY); $('bgStatus').textContent='Очищено'; setTimeout(()=>$('bgStatus').textContent='',800); });
-  safeOn($('bgApply'), 'click', ()=>{ const f = $('bgFile'); if(!f||!f.files||!f.files[0]){ $('bgStatus').textContent='Виберіть файл'; return; } const r = new FileReader(); r.onload = e => { const src = e.target.result; $('mainArea').style.backgroundImage = `url(${src})`; localStorage.setItem(BG_KEY, src); $('bgStatus').textContent='Застосовано'; setTimeout(()=>{ $('modalBg').classList.remove('show'); $('modalBg').setAttribute('aria-hidden','true'); $('bgStatus').textContent=''; },600); }; r.readAsDataURL(f.files[0]); });
+  safeOn($('bgApply'), 'click', ()=>{ const f = $('bgFile'); if(!f||!f.files||!f.files[0]){ $('bgStatus').textContent='Виберіть файл'; return; } const r = new FileReader(); r.onload = e => { const src = e.target.result; $('mainArea').style.backgroundImage = `url(${src})`; localStorage.setItem(BG_KEY, src); $('bgStatus').textContent='Застосовано'; setTimeout(()=>{ $('bgStatus').textContent=''; },1200); }; r.readAsDataURL(f.files[0]); });
+
+  function showSettingsModal(){ const modal = $('modalSettings'); if(modal){ modal.classList.add('show'); modal.setAttribute('aria-hidden','false'); } }
+  function hideSettingsModal(){ const modal = $('modalSettings'); if(modal){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); } }
 
   // editor bindings
   safeOn($('btnAdd'), 'click', ()=> openEditor(null));
@@ -1065,14 +1319,16 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   safeOn($('eDelete'), 'click', ()=> { if(confirm('Ви впевнені?')) deleteCurrentTemplate(); });
 
   // selection & other bindings
-  safeOn($('btnEditMode'), 'click', ()=> { editMode = !editMode; $('btnEditMode').classList.toggle('active', editMode); if(!editMode) clearSelection(); });
+  safeOn($('btnSettings'), 'click', showSettingsModal);
+  safeOn($('btnCloseSettings'), 'click', hideSettingsModal);
+  safeOn($('btnEditMode'), 'click', ()=> { editMode = !editMode; $('btnEditMode').classList.toggle('active', editMode); if(!editMode) clearSelection(); syncSelectionUI(); });
   safeOn($('btnSelectAll'), 'click', ()=> selectAllVisible());
   safeOn($('btnCancelSelection'), 'click', ()=> clearSelection());
   safeOn($('btnDeleteSelected'), 'click', ()=> deleteSelected());
   safeOn($('btnEditSelected'), 'click', ()=> { if(window.selectedTiles.length !== 1){ alert('Виберіть один шаблон'); return; } openEditor(window.selectedTiles[0]); });
 
   // export (reads from localStorage to include all templates and base64 images)
-  safeOn($('btnExport'), 'click', ()=>{ try{ const all = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); const data = JSON.stringify(all,null,2); const blob = new Blob([data],{type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='templates.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),1000); }catch(err){ console.error('Export error', err); alert('Не вдалося експортувати JSON'); } });
+  safeOn($('btnExportJson'), 'click', ()=>{ try{ const all = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); const data = JSON.stringify(all,null,2); const blob = new Blob([data],{type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='templates.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),1000); }catch(err){ console.error('Export error', err); alert('Не вдалося експортувати JSON'); } });
 
   // search
   safeOn($('search'), 'input', ()=> { clearSelection(); renderTemplates(); });
@@ -1090,6 +1346,7 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
     allCats.forEach(c => { if(!categoryOrder.includes(c)) categoryOrder.push(c); });
     categoryOrder = categoryOrder.filter(c => allCats.includes(c));
     wrap.innerHTML = '';
+
     const base = ['Усі','📌 Обране'];
     base.forEach(b=>{
       const btn = document.createElement('button');
@@ -1098,12 +1355,61 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
       btn.onclick = ()=>{ currentCategory = b; clearSelection(); renderTemplates(); };
       wrap.appendChild(btn);
     });
-    categoryOrder.forEach(cat=>{
-      const b = document.createElement('button');
-      b.className = 'category-btn' + (cat===currentCategory ? ' active' : '');
-      b.textContent = cat;
-      b.onclick = ()=>{ currentCategory = cat; clearSelection(); renderTemplates(); };
-      wrap.appendChild(b);
+
+    const nested = {};
+    categoryOrder.forEach(cat => {
+      const parts = cat.split('/').map(s => s.trim()).filter(Boolean);
+      if(parts.length === 0) return;
+      const parent = parts[0];
+      const child = parts.slice(1).join('/');
+      if(!nested[parent]) nested[parent] = new Set();
+      if(child) nested[parent].add(child);
+      if(!child) nested[parent].add('');
+    });
+
+    Object.keys(nested).forEach(parent => {
+      if(currentCategory.startsWith(parent + '/')) openCategories.add(parent);
+      const group = document.createElement('div');
+      group.className = 'category-group';
+      if(openCategories.has(parent)) group.classList.add('open');
+
+      const parentBtn = document.createElement('button');
+      parentBtn.className = 'category-btn' + (parent===currentCategory ? ' active' : '');
+      parentBtn.textContent = parent;
+      parentBtn.onclick = ()=>{
+        if(openCategories.has(parent)){
+          openCategories.delete(parent);
+        } else {
+          openCategories.clear();
+          openCategories.add(parent);
+        }
+        currentCategory = parent;
+        clearSelection();
+        renderTemplates();
+      };
+      group.appendChild(parentBtn);
+
+      const childWrap = document.createElement('div');
+      childWrap.className = 'category-child-wrap';
+      if(openCategories.has(parent)) childWrap.style.maxHeight = '400px';
+
+      const children = Array.from(nested[parent]).filter(c => c).sort();
+      children.forEach(child => {
+        const fullName = parent + '/' + child;
+        const childBtn = document.createElement('button');
+        childBtn.className = 'category-btn' + (fullName===currentCategory ? ' active' : '');
+        childBtn.textContent = '• ' + child;
+        childBtn.onclick = ()=>{
+          openCategories.add(parent);
+          currentCategory = fullName;
+          clearSelection();
+          renderTemplates();
+        };
+        childWrap.appendChild(childBtn);
+      });
+
+      group.appendChild(childWrap);
+      wrap.appendChild(group);
     });
 
     if(window.Sortable){
@@ -1124,18 +1430,22 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   function init(){
     const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
     if(savedTheme === 'dark') document.body.classList.add('dark'); else document.body.classList.remove('dark');
+    updateLogo();
     safeOn($('btnTheme'), 'click', ()=> {
       const isDark = document.body.classList.toggle('dark');
       localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
+      updateLogo();
     });
 
     const zoomRange = $('zoomRange');
+    const zoomValue = $('zoomValue');
     if(zoomRange){
       const base = 220;
       const saved = localStorage.getItem(UI_TILE_KEY);
       if(saved) zoomRange.value = (parseInt(saved)/base).toFixed(2);
       else zoomRange.value = 1;
-      zoomRange.addEventListener('input', (e)=>{ const base=220; let w=Math.round(base * parseFloat(e.target.value)); const min=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tile-min'))||160; const max=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tile-max'))||360; if(w<min) w=min; if(w>max) w=max; document.documentElement.style.setProperty('--tile', w+'px'); localStorage.setItem(UI_TILE_KEY, String(w)); setTimeout(()=>renderTemplates(),120); });
+      if(zoomValue) zoomValue.textContent = Math.round(parseFloat(zoomRange.value) * 100) + '%';
+      zoomRange.addEventListener('input', (e)=>{ const base=220; let w=Math.round(base * parseFloat(e.target.value)); const min=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tile-min'))||160; const max=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tile-max'))||360; if(w<min) w=min; if(w>max) w=max; document.documentElement.style.setProperty('--tile', w+'px'); localStorage.setItem(UI_TILE_KEY, String(w)); if(zoomValue) zoomValue.textContent = Math.round(parseFloat(e.target.value) * 100) + '%'; setTimeout(()=>renderTemplates(),120); });
     }
 
     const savedBg = localStorage.getItem(BG_KEY);
@@ -1233,6 +1543,345 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
       isEnabled: ()=> hotkeysEnabled
     };
   })();
+
+})();
+</script>
+<script>
+// ===== FINAL STABLE FIX =====
+window.__hotkeysEnabled = true;
+window.AUTO_IMPORT_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSK7Pw9yTYj7PzsyFaeaUP8PmfegdxYR900xhC0MKgeZ9DQ-zCimnNMFarxdsBKXSBp9lm3LOfM8MP7/pub?output=csv";
+//Фільтрація шаблонів за пошуком і категорією//
+window.getFilteredTemplates = function() {
+  const search = document.getElementById('search')?.value?.toLowerCase() || '';
+  const category = window.currentCategory || 'all';
+
+  return (window.templates || []).filter(t => {
+
+    const titleMatch = (t.title || '').toLowerCase().includes(search);
+
+    if (category === 'all') return titleMatch;
+
+    if (!category.includes('/')) {
+      return titleMatch && (t.category || '').startsWith(category);
+    }
+
+    return titleMatch && t.category === category;
+  });
+};
+// 2. PATCH RENDER
+(function waitAndPatch(){
+  if (!window.render) return setTimeout(waitAndPatch, 100);
+  if (window.__renderPatched) return;
+
+  window.__renderPatched = true;
+
+  const originalRender = window.render;
+
+  window.render = function() {
+    originalRender();
+    window.filteredTemplates = window.getFilteredTemplates();
+
+    setTimeout(() => {
+      window.renderHotkeyBadges?.();
+      window.updatePreviewState?.();
+    }, 0);
+  };
+
+})();
+
+// 3. HOTKEYS
+window.applyImportedData = function(data) {
+  if (!Array.isArray(data)) return;
+
+  const parsed = data.map((row, i) => {
+
+    const values = Object.values(row);
+
+    const title =
+      row.title ||
+      values[0] ||
+      'No title';
+
+    const text =
+      row.text ||
+      values[1] ||
+      '';
+
+    let rawCategory =
+      row.category ||
+      values[5] ||
+      'Other';
+
+    let category = rawCategory
+      .replace(/[,|\-]+/g, '/')
+      .replace(/\s*\/\s*/g, '/')
+      .split('/')
+      .map(s => s.trim())
+      .filter(Boolean)
+      .join('/');
+
+    return {
+      id: Date.now() + i,
+      title,
+      text,
+      category,
+      tags: ''
+    };
+  });
+
+  window.templates.length = 0;
+  window.templates.push(...parsed);
+  console.log(window.templates.map(t => t.category));
+  localStorage.setItem('brainTemplates', JSON.stringify(window.templates));
+  window.render?.();
+};
+// 5. SAFE BIND
+window.safeBind = function(id, event, handler){
+  const el = document.getElementById(id);
+  if (!el || el._binded) return;
+  el._binded = true;
+  el.addEventListener(event, handler);
+};
+
+
+// ===== BUTTONS + UI FIX (CLEAN) =====
+setTimeout(() => {
+
+  // 🔥 HOTKEYS toggle
+  const hotBtn = document.getElementById('btnHotkeys');
+  if (hotBtn) {
+    hotBtn.onclick = () => {
+      window.__hotkeysEnabled = !window.__hotkeysEnabled;
+      console.log('Hotkeys:', window.__hotkeysEnabled);
+    };
+  }
+
+  // 🔥 Закрытие импорта
+  const closeImport = document.getElementById('btnImportClose');
+  if (closeImport) {
+    closeImport.onclick = () => {
+      document.getElementById('modalImport')?.classList.remove('show');
+    };
+  }
+
+  // 🔥 АВТОИМПОРТ (Google Sheets)
+  const autoBtn = document.getElementById('btnAutoImport');
+  if (autoBtn) {
+    autoBtn.onclick = async () => {
+      console.log('🚀 автоимпорт клик');
+
+      try {
+        const res = await fetch(window.AUTO_IMPORT_CSV);
+        const text = await res.text();
+
+        Papa.parse(text, {
+          header: true,
+          complete: r => {
+            console.log('CSV loaded', r.data);
+            applyImportedData(r.data);
+          }
+        });
+
+      } catch (err) {
+        console.error('Import error:', err);
+        alert('Помилка імпорту');
+      }
+    };
+  }
+
+  // 🔥 Очистка поиска (кнопка)
+  const clearBtn = document.getElementById('clearSearch');
+  if (clearBtn) {
+    clearBtn.onclick = () => {
+      const input = document.getElementById('search');
+      if (!input) return;
+
+      input.value = '';
+      window.render?.();
+    };
+  }
+
+  // 🔥 Автоочистка поиска (15 сек)
+  const searchInput = document.getElementById('search');
+  if (searchInput) {
+
+    let timer;
+
+    searchInput.addEventListener('input', () => {
+      clearTimeout(timer);
+
+      timer = setTimeout(() => {
+        searchInput.value = '';
+        window.render?.();
+      }, 15000);
+    });
+  }
+
+}, 500);
+
+
+// ===== LOGO AUTO SWITCH =====
+function updateLogo(){
+  const isDark = document.body.classList.contains('dark');
+  const logo = document.getElementById('logo');
+  if(!logo) return;
+
+  logo.src = isDark ? 'dark_theme.png' : 'light_theme.png';
+}
+
+setInterval(updateLogo, 500);
+</script>
+
+
+<script>
+// ===== CATEGORY PATCH =====
+(function(){
+
+function patchedRenderCategories(){
+
+  const box = document.getElementById('categories');
+  if(!box || !window.templates) return;
+
+  box.innerHTML = '';
+
+  const map = {};
+
+  window.templates.forEach(t => {
+
+    const parts = (t.category || 'Other')
+      .replace(',', '/')
+      .split('/')
+      .map(s => s.trim());
+
+    const parent = parts[0];
+    const child = parts[1];
+
+    if(!map[parent]) map[parent] = new Set();
+    if(child) map[parent].add(child);
+  });
+
+  Object.keys(map).forEach(parent => {
+
+    const parentBtn = document.createElement('button');
+    parentBtn.className = 'btn';
+    parentBtn.textContent = parent;
+
+    parentBtn.onclick = () => {
+      window.currentCategory = parent;
+      window.render?.();
+    };
+
+    box.appendChild(parentBtn);
+
+    map[parent].forEach(child => {
+
+      const sub = document.createElement('button');
+      sub.className = 'btn';
+      sub.textContent = '— ' + child;
+
+      sub.onclick = (e) => {
+        e.stopPropagation();
+        window.currentCategory = parent + '/' + child;
+        window.render?.();
+      };
+
+      box.appendChild(sub);
+    });
+
+  });
+}
+
+// 🔥 ВОТ ЭТОГО НЕ ХВАТАЛО
+window.renderCategories = patchedRenderCategories;
+
+})();
+</script>
+
+
+<script>
+// ===== CLEAN ADD UI =====
+(function(){
+
+  const modal = document.createElement('div');
+  modal.id = 'cleanAddModal';
+
+  modal.innerHTML = `
+    <div class="box">
+      <h3>Додати шаблон</h3>
+      <input id="cTitle" placeholder="Title"><br><br>
+      <textarea id="cText" placeholder="Text"></textarea><br><br>
+      <input id="cParent" placeholder="Категорія"><br><br>
+      <input id="cChild" placeholder="Підкатегорія"><br><br>
+      <button id="cSave" class="btn">Зберегти</button>
+      <button id="cClose" class="btn">Закрити</button>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const style = document.createElement('style');
+  style.innerHTML = `
+    #cleanAddModal{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.4);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+    }
+    #cleanAddModal.show{display:flex}
+    #cleanAddModal .box{
+      background:var(--card);
+      padding:16px;
+      border-radius:12px;
+      width:320px;
+    }
+  `;
+  document.head.appendChild(style);
+
+  function openModal(){ modal.classList.add('show'); }
+  function closeModal(){ modal.classList.remove('show'); }
+
+  const wait = setInterval(()=>{
+    const btn = document.getElementById('addBtn');
+    if(!btn) return;
+
+    clearInterval(wait);
+    btn.onclick = openModal;
+  },100);
+
+  setTimeout(()=>{
+    document.getElementById('cClose').onclick = closeModal;
+
+    document.getElementById('cSave').onclick = ()=>{
+      const title = document.getElementById('cTitle').value;
+      const text = document.getElementById('cText').value;
+      const parent = document.getElementById('cParent').value || 'Other';
+      const child = document.getElementById('cChild').value;
+
+      let raw = child ? parent + '/' + child : parent;
+
+// 🔥 КЛЮЧЕВОЙ ФИКС
+let category = raw
+  .replace(',', '/')
+  .split('/')
+  .map(s => s.trim())
+  .filter(Boolean)
+  .join('/');
+
+      window.templates.push({
+        id: Date.now(),
+        title,
+        text,
+        category
+      });
+
+      localStorage.setItem('brainTemplates', JSON.stringify(window.templates));
+      closeModal();
+      window.render?.();
+    };
+
+  },300);
 
 })();
 </script>
