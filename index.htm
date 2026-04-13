@@ -24,10 +24,10 @@
   --btn-primary-text:#ffffff;
   --btn-warning-bg:#EAB500;
   --btn-warning-text:#000000;
-  --tile:220px;
-  --tile-min:160px;
-  --tile-max:360px;
-  --gap:12px;
+  --tile:200px;
+  --tile-min:150px;
+  --tile-max:340px;
+  --gap:10px;
 }
 body.dark{
   --bg:#212121;
@@ -51,57 +51,100 @@ body.dark{
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);transition:background-color .25s ease,color .25s ease}
+body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text);text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;transition:background-color .22s ease,color .22s ease}
+button,input,textarea,select{font:inherit;transition:background-color .22s ease,color .22s ease,border-color .22s ease,box-shadow .22s ease}
 .app{display:flex;height:100vh}
-.sidebar{width:260px;background:var(--panel-sidebar);border-right:1px solid var(--border);padding:14px;overflow:auto;display:flex;flex-direction:column;gap:12px}
-.main{flex:1;display:flex;flex-direction:column;background-position:center;background-repeat:no-repeat;background-size:cover;background-color:var(--bg)}
-.topbar{display:flex;gap:10px;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--border);align-items:center;z-index:120}
+.sidebar{width:250px;background:linear-gradient(180deg, var(--panel-sidebar) 0%, rgba(59,130,246,.05) 100%);border-right:1px solid var(--border);padding:8px 16px 12px;overflow:auto;display:flex;flex-direction:column;gap:12px;min-width:250px;transition:background-color .35s ease,color .35s ease,border-color .35s ease}
+.main{flex:1;display:flex;flex-direction:column;background-position:center;background-repeat:no-repeat;background-size:cover;background-color:var(--bg);min-width:0;transition:background-color .35s ease,color .35s ease}
+.topbar{display:flex;gap:10px;padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--border);align-items:center;z-index:120;min-height:58px;transition:background-color .35s ease,color .35s ease,border-color .35s ease}
 
 /* Buttons */
 .btn.active{background:var(--accent-soft);border-color:var(--accent)}
 .btn.cancel{background:#ef4444;color:#fff;border-color:#ef4444}
 
 /* Inputs */
-.search,.input,textarea,select{padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text)}
-.search{width:320px;min-width:120px}
+.search,.input,textarea,select{padding:10px 12px;border:1px solid var(--border);border-radius:14px;background:var(--card);color:var(--text);transition:border-color .22s ease,box-shadow .22s ease,background .22s ease}
+.search, .input{min-height:44px}
+.search{width:220px;min-width:140px}
+.search:focus,.input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(59,130,246,.08)}
+.category-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
 
 /* Categories */
-.category-btn{display:block;width:100%;padding:10px;margin-bottom:6px;border:none;border-radius:12px;background:none;color:var(--text);text-align:left;cursor:pointer;border:1px solid transparent;transition:background-color .18s ease, transform .18s ease;}
-.category-btn:hover{transform:translateX(2px);background:var(--hover);border-color:var(--border)}
-.category-btn.active{background:var(--accent-soft);border-color:var(--accent)}
-.category-group{display:block}
-.category-child-wrap{overflow:hidden;max-height:0;transition:max-height .35s ease, opacity .35s ease, padding .35s ease;opacity:0;padding-top:0;}
-.category-group.open .category-child-wrap{max-height:420px;opacity:1;padding-top:6px;}
-.category-child-wrap .category-btn{padding-left:24px;}
-.topbar{display:flex;gap:10px;padding:16px 18px;background:var(--panel-sidebar);border-bottom:1px solid var(--border);align-items:center;z-index:120;min-height:66px;}
-.logo{height:44px;width:auto;object-fit:contain;}
+.category-btn{display:flex;width:100%;align-items:center;height:44px;padding:0 12px;margin-bottom:6px;border:none;border-radius:14px;background:none;color:var(--text);text-align:left;cursor:pointer;border:1px solid transparent;transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;}
+.category-btn:hover{transform:none;background:var(--hover);border-color:var(--border);}
+.category-btn.active{background:var(--accent-soft);border-color:var(--accent);color:var(--text)}
+.category-group{display:block;overflow:hidden;}
+.category-child-wrap{overflow:hidden;max-height:0;opacity:0;padding-top:0;transition:max-height .32s ease,opacity .22s ease,padding .22s ease;will-change:max-height,opacity;}
+.category-group.open .category-child-wrap{max-height:999px;opacity:1;padding-top:8px;}
+.category-child-wrap .category-btn{padding-left:24px;opacity:0;transform:translateY(-4px);transition:opacity .22s ease,transform .22s ease;}
+.category-group.open .category-child-wrap .category-btn{transform:translateY(0);opacity:1;}
+.sidebar-actions{display:flex;gap:12px;flex-wrap:nowrap;margin-bottom:12px;align-items:center;transition:opacity .28s ease,transform .28s ease,height .28s ease;}
+.sidebar-actions.hidden{opacity:0;pointer-events:none;transform:translateX(-8px);height:0;overflow:hidden;}
+.tab-btn{flex:0 1 auto;min-width:56px;border-radius:14px;padding:0 14px;height:40px;font-size:13px;background:rgba(255,255,255,.08);border:1px solid transparent;color:var(--text);display:inline-flex;align-items:center;justify-content:center;position:relative;transition:background .18s ease,color .18s ease,transform .18s ease,opacity .18s ease,max-width .18s ease,padding .18s ease;}
+.tab-btn.active{background:var(--btn-primary-bg);color:var(--btn-primary-text);box-shadow:0 10px 24px rgba(0,0,0,.14);border-color:transparent;}
+.tab-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;font-size:0;line-height:1;}
+.search-wrap{position:relative;width:44px;height:44px;display:flex;align-items:center;}
+.search-wrap.open{width:260px;}
+.sidebar .search-wrap.open{width:100%;}
+.search-btn{position:relative;flex-shrink:0;width:44px;height:44px;padding:0;border-radius:14px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#111827;background:rgba(0,0,0,.06);backdrop-filter:blur(10px);transition:all .35s ease;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 18px rgba(0,0,0,.12);z-index:2;}
+body.dark .search-btn{color:#f5f5f5;background:rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 10px 18px rgba(0,0,0,.18);}
+.search-btn:hover{transform:translateY(-2px) scale(1.03);background:rgba(234,181,0,.16);color:#111827;}
+body.dark .search-btn:hover{background:rgba(65,84,163,.24);color:#ffffff;}
+.search-btn.active{background:var(--btn-warning-bg);color:var(--btn-warning-text);}
+body.dark .search-btn.active{background:var(--btn-primary-bg);color:var(--btn-primary-text);}
+.search-input{position:absolute;left:0;width:100%;height:44px;padding:0 18px 0 56px;border-radius:18px;border:none;outline:none;background:rgba(255,255,255,0.08);backdrop-filter:blur(10px);color:var(--text);font-size:14px;opacity:0;pointer-events:none;transition:all .35s cubic-bezier(.77,0,.18,1);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 18px rgba(0,0,0,.12);}
+.search-input:focus{cursor:text;opacity:1;}
+.search-wrap.open .search-input{width:100%;opacity:1;pointer-events:auto;}
+.search-wrap.open .search-btn{transform:translateX(-4px);}
+.search-icon{width:20px;height:20px;stroke:currentColor;stroke-width:2;fill:none;transition:.35s ease;}
+.close-icon{width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;}
+.category-search-wrap{display:none;}
+.category-search{width:100%;padding:10px 12px;border-radius:14px;border:1px solid var(--border);background:var(--card);color:var(--text);box-shadow:inset 0 1px 2px rgba(0,0,0,.06);transition:box-shadow .2s ease, border-color .2s ease;}
+.category-search:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(59,130,246,.12);}
+.logo{height:54px;width:auto;object-fit:contain;}
+.sidebar-logo{justify-content:center;}
 
 /* Grid & tiles */
 .grid{padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--tile),1fr));gap:var(--gap);overflow:auto}
-.tile{position:relative;background:var(--tile-bg);color:var(--tile-text);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-height:160px;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
-.tile:hover{transform:translateY(-3px);border-color:var(--accent)}
-.tile.selected{outline:2px solid var(--accent);background:var(--accent-soft);transform:translateY(-4px)}
+.tile{position:relative;background:var(--tile-bg);color:var(--tile-text);border:1px solid rgba(148,163,184,.18);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;min-height:160px;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background-color .35s ease,color .35s ease}
+.tile:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:0 18px 42px rgba(0,0,0,.12)}
+.tile.selected{outline:2px solid var(--accent);background:var(--accent-soft);transform:translateY(-2px)}
 
 /* Content area */
 .contentArea{flex:1;position:relative;display:flex;align-items:center;justify-content:center;padding:12px;overflow:hidden}
-.thumb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:12px;transition:opacity .22s ease,transform .22s ease}
-.thumb img{width:100%;height:100%;object-fit:contain;background:transparent}
-.previewText{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;color:var(--muted);font-size:13px;text-align:center;opacity:0;transform:translateY(6px);transition:opacity .22s ease,transform .22s ease}
-.tile:hover .thumb{opacity:0;transform:translateY(-6px)}
-.tile:hover .previewText{opacity:1;transform:translateY(0)}
+.thumb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:12px;overflow:hidden;border-radius:18px;background:transparent;transition:transform .22s ease,filter .22s ease}
+.thumb::before{content:'';position:absolute;inset:0;background:transparent;pointer-events:none;opacity:0;transition:opacity .28s ease}
+.thumb img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;transition:transform .28s ease,filter .28s ease,opacity .28s ease;border-radius:12px}
+.thumb > div{display:flex;align-items:center;justify-content:center;width:100%;height:100%;transition:transform .28s ease,filter .28s ease,opacity .28s ease;border-radius:12px}
+.thumb > *{transition:transform .22s ease,opacity .22s ease;}
+.tile:hover .thumb img{transform:scale(0.96);filter:brightness(.92);opacity:0}
+.tile:hover .thumb > div{transform:scale(0.96);opacity:0}
+.previewText{position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:flex-start;padding:14px;color:#fff;font-size:13px;line-height:1.6;text-align:left;opacity:0;transform:translateY(12px);transition:opacity .24s ease,transform .24s ease,background .24s ease;white-space:pre-wrap;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;box-sizing:border-box;width:100%;background:transparent;font-family:inherit;font-weight:500;letter-spacing:0.01em;}
+.title{padding:10px 12px;text-align:center;font-weight:600;margin-top:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-height:54px;transition:opacity .24s ease,transform .24s ease,max-height .24s ease,padding .24s ease,margin-top .24s ease;}
+.tile:hover .title{opacity:0;transform:translateY(6px);max-height:0;padding-top:0;padding-bottom:0;margin-top:0;}
+.tile:hover .thumb{transform:scale(1.005)}
+.tile:hover .thumb::before{opacity:1;background:rgba(0,0,0,0.32)}
+.tile:hover .previewText{opacity:1;transform:translateY(0);background:rgba(0,0,0,0.4)}
+body.dark .tile{background:var(--tile-bg);border:1px solid rgba(255,255,255,.08);}
+body.dark .previewText{color:#f5f5f5;background:rgba(0,0,0,0.3)}
 
 /* Title anchored to bottom, centered horizontally, equal side padding */
 .title{padding:10px 12px;text-align:center;font-weight:600;margin-top:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* Modal */
-.modalWrap{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;visibility:hidden;display:flex;align-items:center;justify-content:center;z-index:300;transition:opacity .18s ease,visibility .18s ease}
+.modalWrap{position:fixed;inset:0;background:rgba(15,23,42,.35);backdrop-filter:blur(4px);opacity:0;visibility:hidden;display:flex;align-items:center;justify-content:center;z-index:300;transition:opacity .22s ease,visibility .22s ease}
 .modalWrap.show{opacity:1;visibility:visible}
-.modal{width:min(760px,96vw);background:var(--card);padding:20px;border-radius:14px;border:1px solid var(--border);max-height:90vh;overflow:auto;transform:translateY(10px) scale(.98);opacity:0;position:relative;transition:all .18s ease}
+.modal{width:min(520px,92vw);max-width:520px;background:var(--card);padding:18px;border-radius:18px;border:1px solid var(--border);max-height:90vh;overflow:auto;transform:translateY(12px) scale(.98);opacity:0;position:relative;box-shadow:0 22px 46px rgba(0,0,0,.12);transition:transform .28s cubic-bezier(.22,.61,.36,1),opacity .24s ease,box-shadow .24s ease,background-color .35s ease,color .35s ease,border-color .35s ease}
+body.dark .modal{background:var(--card);border-color:rgba(255,255,255,.08)}
 .modalWrap.show .modal{transform:translateY(0) scale(1);opacity:1}
-.modal-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-.modal-header h3{margin:0;font-size:20px}
-.close-btn{min-width:auto;padding:10px 12px;font-size:16px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:var(--text)}
-.modal-note{margin:6px 0 0;color:var(--muted);font-size:14px;line-height:1.5;opacity:.78}
+.modal-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.modal-header h2,
+.modal-header h3,
+.modal h3{margin:0}
+.note,
+.modal-note{margin:0;padding:12px 14px;border-radius:14px;background:rgba(59,130,246,.08);color:var(--muted);font-size:14px;line-height:1.6;}
+body.dark .note,
+body.dark .modal-note{background:rgba(234,181,0,.12);color:var(--text)}
 .import-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
 .import-panel{display:flex;flex-direction:column;gap:10px;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--card)}
 .import-panel .panel-title{margin:0;font-size:13px;font-weight:700;color:var(--text)}
@@ -111,6 +154,15 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 .export-panel{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--card);margin-bottom:14px}
 .export-panel .hint{margin:0;color:var(--muted);font-size:13px}
 @media(max-width:760px){.modal{width:94vw}.import-grid{grid-template-columns:1fr}}
+.modal-body{display:flex;flex-direction:column;gap:14px}
+.field-row{display:flex;gap:12px;flex-wrap:wrap}
+.field-row--compact{align-items:center}
+.field-row .input{flex:1;min-width:0}
+.field-checkbox{display:inline-flex;align-items:center;gap:8px;color:var(--text);font-size:14px}
+.field-checkbox input{width:16px;height:16px}
+.modal-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.modal-actions .btn{min-width:118px;height:44px;padding:0 18px}
+.small{font-size:13px;color:var(--muted)}
 .previewTable{width:100%;border-collapse:collapse;margin-top:8px}
 .previewTable th, .previewTable td{border:1px solid var(--border);padding:6px;font-size:13px;text-align:left;background:var(--card);color:var(--text)}
 .mappingRow{display:flex;gap:8px;align-items:center;margin-top:8px}
@@ -123,7 +175,11 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 .undoBar{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:rgba(0,0,0,0.85);color:#fff;padding:10px 14px;border-radius:8px;display:flex;gap:8px;align-items:center;z-index:9999}
 
 /* small visual feedback after copy */
-.tile.just-copied{box-shadow:0 6px 18px rgba(59,130,246,0.12);outline:2px solid rgba(59,130,246,0.18)}
+.tile.just-copied{animation:tile-copy .32s ease;box-shadow:0 18px 40px rgba(59,130,246,0.2);outline:2px solid rgba(59,130,246,0.32)}
+.tile.dragging{transform:scale(1.02);box-shadow:0 24px 58px rgba(0,0,0,.22)}
+.sortable-chosen{transform:scale(1.02);box-shadow:0 18px 44px rgba(0,0,0,.18)}
+.sortable-ghost{opacity:.45;filter:blur(.4px)}
+@keyframes tile-copy{0%{transform:translateY(0)}25%{transform:translateY(-3px) scale(1.01)}100%{transform:translateY(0)}}
 
 /* Hotkeys HUD */
 #hotkeysHUD{
@@ -143,69 +199,289 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
 }
 #hotkeysHUD.show{ opacity:1; transform:translateY(0); }
 #hotkeysHUD .keys{ font-weight:700; letter-spacing:0.6px; }
-.btn{
+.btn{  
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  padding:8px 12px;
-  border-radius:10px;
+  padding:0 14px;  
+  min-height:44px;
+  height:44px;
+  border-radius:12px;
   border:1px solid var(--btn-border);
-  background:var(--card);
+  background:var(--panel);
   color:var(--text);
   cursor:pointer;
   user-select:none;
-  transition:background-color .18s ease,color .18s ease,transform .18s ease,opacity .18s ease;
+  transition:transform .22s ease,box-shadow .22s ease,background-color .22s ease,color .22s ease,opacity .22s ease;
+  box-shadow:0 8px 14px rgba(0,0,0,.04);
+  font-weight:600;
 }
 
 .btn:hover{
   transform: translateY(-1px);
-  opacity: 0.93;
+  opacity: 1;
+  box-shadow:0 14px 28px rgba(0,0,0,.08);
+}
+
+.btn svg,
+button svg{pointer-events:none;}
+
+.btn.primary{
+  background:var(--btn-primary-bg);
+  color:var(--btn-primary-text);
+  border-color:transparent;
+  box-shadow:0 10px 22px rgba(0,0,0,.14);
+}
+
+.btn.primary:hover{
+  filter:brightness(1.05);
+}
+
+.btn.warning{
+  background:var(--btn-warning-bg);
+  color:var(--btn-warning-text);
+  border-color:transparent;
+  box-shadow:0 10px 22px rgba(0,0,0,.14);
+}
+.btn.warning.active{
+  box-shadow:0 12px 26px rgba(0,0,0,.18);
+  filter:brightness(1.05);
+}
+
+.btn.hotkey-btn{
+  position:relative;
+  padding:14px 26px;
+  border-radius:14px;
+  border:none;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:.3px;
+  color:#cfd3ff;
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(10px);
+  transition:all .3s ease;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 6px 16px rgba(0,0,0,.5);
+}
+
+.btn.hotkey-btn:hover{
+  transform:translateY(-2px);
+  background:#4154A3;
+  color:#fff;
+}
+
+body.light .btn.hotkey-btn{
+  background:rgba(228,228,229,.95);
+  color:var(--text);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.7),
+    0 6px 16px rgba(0,0,0,.08);
+}
+
+.btn.hotkey-btn.active{
+  background:#EAB500;
+  color:#000;
+  box-shadow:
+    0 0 0 2px rgba(234,181,0,.35),
+    0 8px 22px rgba(234,181,0,.35);
+  animation:pulse 2s infinite;
+}
+
+.btn.hotkey-btn::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:14px;
+  opacity:0;
+  transition:.3s;
+  box-shadow:0 0 20px rgba(65,84,163,.5);
+}
+
+.btn.hotkey-btn:hover::after{
+  opacity:1;
+}
+
+.btn.hotkey-btn .dot{
+  position:absolute;
+  top:6px;
+  right:6px;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#555;
+  transition:.3s;
+}
+
+.btn.hotkey-btn.active .dot{
+  background:#00ff88;
+  box-shadow:0 0 8px #00ff88;
+}
+
+@keyframes pulse{
+  0%{
+    box-shadow:
+      0 0 0 0 rgba(234,181,0,.5),
+      0 8px 22px rgba(234,181,0,.35);
+  }
+  70%{
+    box-shadow:
+      0 0 0 10px rgba(234,181,0,0),
+      0 8px 22px rgba(234,181,0,.35);
+  }
+  100%{
+    box-shadow:
+      0 0 0 0 rgba(234,181,0,0),
+      0 8px 22px rgba(234,181,0,.35);
+  }
+}
+
+.btn.warning:hover{
+  filter:brightness(1.05);
+}
+
+.btn.active{
+  background:var(--btn-primary-bg);
+  color:var(--btn-primary-text);
+  border-color:transparent;
+  box-shadow:0 12px 24px rgba(0,0,0,.18);
+}
+
+.btn.cancel{
+  background:#ef4444;
+  color:#fff;
+  border-color:transparent;
+  box-shadow:0 10px 20px rgba(239,68,68,.18);
+}
+
+.btn.cancel:hover{
+  filter:brightness(1.05);
+}
+
+.btn.close-btn{
+  width:44px;
+  height:44px;
+  padding:0;
+  border-radius:12px;
+  background:rgba(255,255,255,.08);
+  color:var(--text);
+  border-color:rgba(255,255,255,.15);
+}
+
+.btn.close-btn:hover{
+  background:rgba(255,255,255,.14);
+}
+
+.btn.full{
+  width:100%;
+  justify-content:center;
 }
 
 .btn.theme-toggle{
-  width:52px;
-  min-width:52px;
-  height:32px;
+  width:44px;
+  min-width:44px;
+  height:44px;
   padding:0;
-  border-radius:999px;
+  border-radius:14px;
   position:relative;
-  background:transparent;
-  border-color:var(--border);
-}
-.btn.theme-toggle::before{
-  content:'';
-  position:absolute;
-  top:4px;
-  bottom:4px;
-  left:4px;
-  right:4px;
-  border-radius:999px;
-  background:var(--theme-toggle-bg);
-  transition:background .2s ease;
-}
-.btn.theme-toggle::after{
-  content:'☀︎';
-  position:absolute;
-  width:20px;
-  height:20px;
-  top:50%;
-  left:6px;
-  transform:translateY(-50%);
+  background:rgba(255,255,255,0.06);
+  border:none;
+  cursor:pointer;
   display:flex;
   align-items:center;
   justify-content:center;
-  border-radius:50%;
-  background:var(--card);
-  color:var(--text);
-  font-size:12px;
-  transition:left .2s ease, background .2s ease, color .2s ease;
+  color:#aaa;
+  backdrop-filter:blur(12px);
+  transition:background .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease;
+  will-change:transform,background-color,color,box-shadow;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.1),
+    0 8px 20px rgba(0,0,0,.5);
 }
-body.dark .btn.theme-toggle::after{
-  content:'🌙';
-  left:calc(100% - 26px);
+
+.theme-btn:hover,
+.btn.theme-toggle:hover{
+  transform:translateY(-1px) scale(1.02);
+  background:#4154A3;
+  color:#fff;
 }
-body.dark .btn.theme-toggle::before{
-  background:rgba(255,255,255,0.14);
+
+body.light .btn.theme-toggle:hover{
+  background:#EAB500;
+  color:#000;
+}
+
+body:not(.light) .btn.theme-toggle.active{
+  background:#EAB500;
+  color:#000;
+  box-shadow:
+    0 0 0 2px rgba(234,181,0,.4),
+    0 10px 26px rgba(234,181,0,.35);
+}
+
+body.light .btn.theme-toggle.active{
+  background:#4154A3;
+  color:#fff;
+  box-shadow:
+    0 0 0 2px rgba(65,84,163,.4),
+    0 10px 26px rgba(65,84,163,.35);
+}
+
+.btn.theme-toggle::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:12px;
+  opacity:0;
+  transition:.3s;
+  box-shadow:0 0 22px rgba(65,84,163,.6);
+}
+
+.btn.theme-toggle:hover::after{
+  opacity:1;
+}
+
+.btn.theme-toggle .theme-icon{
+  width:22px;
+  height:22px;
+  stroke:currentColor;
+  stroke-width:2;
+  fill:none;
+  transition:transform .22s ease, opacity .22s ease;
+  transform-origin:center center;
+  will-change:transform, opacity;
+  transform-box:fill-box;
+  -webkit-transform-box:fill-box;
+}
+
+.btn.theme-toggle .theme-icon .sun,
+.btn.theme-toggle .theme-icon .moon{
+  transition:transform .22s ease, opacity .22s ease;
+  transform-origin:center center;
+  transform-box:fill-box;
+  -webkit-transform-box:fill-box;
+  will-change:transform, opacity;
+}
+
+.btn.theme-toggle .theme-icon .sun{
+  opacity:0;
+  transform:scale(0.6);
+}
+
+.btn.theme-toggle .theme-icon .moon{
+  opacity:1;
+  transform:scale(1);
+}
+
+body.light .btn.theme-toggle .theme-icon .sun{
+  opacity:1;
+  transform:scale(1);
+}
+
+body.light .btn.theme-toggle .theme-icon .moon{
+  opacity:0;
+  transform:scale(0.6);
 }
 
 .btn.icon-btn{
@@ -235,6 +511,74 @@ body.dark .btn.theme-toggle::before{
   border-radius:50%;
   background:currentColor;
   transform:translate(-50%, -50%);
+}
+
+.gear-btn{
+  position:relative;
+  width:44px;
+  min-width:44px;
+  height:44px;
+  padding:0;
+  border-radius:14px;
+  border:none;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--text);
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(10px);
+  transition:all .25s ease;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 6px 14px rgba(0,0,0,.18);
+  overflow:hidden;
+}
+
+body.dark .gear-btn{
+  background:rgba(255,255,255,0.06);
+  color:#ececec;
+}
+
+.gear-icon{
+  width:24px;
+  height:24px;
+  fill:currentColor;
+  transition:all .35s ease;
+}
+
+.gear-btn:hover{
+  transform:translateY(-2px) scale(1.05);
+  background:var(--btn-primary-bg);
+  color:var(--btn-primary-text);
+}
+
+.gear-btn:hover .gear-icon{
+  transform:rotate(90deg);
+}
+
+.gear-btn:active{
+  transform:scale(.94);
+}
+
+.gear-btn.active{
+  background:var(--btn-warning-bg);
+  color:var(--btn-warning-text);
+  box-shadow: 0 0 0 2px rgba(234,181,0,.4), 0 8px 20px rgba(234,181,0,.3);
+}
+
+.gear-btn::after,
+.search-btn::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:16px;
+  opacity:0;
+  transition:.3s;
+  box-shadow:0 0 18px rgba(65,84,163,.35);
+}
+
+.gear-btn:hover::after,
+.search-btn:hover::after{
+  opacity:1;
 }
 
 .btn.primary{
@@ -288,8 +632,8 @@ body.dark .btn.theme-toggle::before{
   user-select:none;
   pointer-events:none;
 }
-.sidebar-logo{display:flex;justify-content:center;align-items:center;padding:18px 0 16px;margin-bottom:14px}
-.sidebar-logo .logo{max-height:52px;max-width:100%;height:auto;width:auto;}
+.sidebar-logo{display:flex;justify-content:center;align-items:center;padding:10px 0 12px;margin-bottom:12px}
+.sidebar-logo .logo{max-height:38px;max-width:100%;height:auto;width:auto;}
 .tile.pinned{border-color:var(--btn-warning-bg);box-shadow:0 0 0 1px rgba(234,181,0,0.35);}
 .tile-badge{position:absolute;top:10px;right:10px;padding:4px 8px;font-size:11px;font-weight:700;color:var(--btn-warning-text);background:var(--btn-warning-bg);border-radius:999px;display:flex;align-items:center;gap:4px;}
 .tile-badge + .tile-badge{top:34px;}
@@ -307,7 +651,15 @@ body.dark .btn.theme-toggle::before{
 
 
 @media(max-width:900px){ .search{width:160px} .sidebar{width:200px} .modal{width:94vw} }
-.settings-panel{display:flex;flex-direction:column;gap:16px}
+.modal-body{display:flex;flex-direction:column;gap:14px}
+.field-row{display:flex;gap:12px;flex-wrap:wrap}
+.field-row--compact{align-items:center}
+.field-row .input{flex:1;min-width:0}
+.field-checkbox{display:inline-flex;align-items:center;gap:8px;color:var(--text);font-size:14px}
+.field-checkbox input{width:16px;height:16px}
+.modal-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.modal-actions .btn{min-width:118px;height:44px;padding:0 18px}
+.small{font-size:13px;color:var(--muted)}
 .settings-group{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--border)}
 .settings-group label{font-weight:700;color:var(--text);}
 .settings-group .hint{font-size:13px;color:var(--muted);}
@@ -322,30 +674,74 @@ body.dark .btn.theme-toggle::before{
     <div class="sidebar-logo">
       <img id="logo" src="light_theme.png" class="logo" draggable="false" ondragstart="return false;" oncontextmenu="return false;">
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <!-- theme toggle moved to topbar -->
+    <div class="search-wrap" id="categorySearchWrap">
+      <button id="btnCatSearch" class="search-btn" aria-label="Пошук категорій"><svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg></button>
+      <input id="categorySearch" class="search-input" placeholder="Пошук категорій..." />
     </div>
-    <div id="categoryList" style="display:flex;flex-direction:column;gap:6px;margin-top:12px"></div>
+    <div class="sidebar-actions">
+      <button id="btnCatAll" class="btn tab-btn active" title="Усі">
+        <svg class="tab-icon" viewBox="0 0 100 100" aria-hidden="true">
+          <rect x="8" y="8" width="38" height="38" rx="6" fill="currentColor" />
+          <rect x="15" y="15" width="24" height="24" rx="3" fill="#fff" />
+          <rect x="54" y="8" width="38" height="38" rx="6" fill="currentColor" />
+          <rect x="61" y="15" width="24" height="24" rx="3" fill="#fff" />
+          <rect x="8" y="54" width="38" height="38" rx="6" fill="currentColor" />
+          <rect x="15" y="61" width="24" height="24" rx="3" fill="#fff" />
+          <rect x="54" y="54" width="38" height="38" rx="6" fill="currentColor" />
+          <rect x="61" y="61" width="24" height="24" rx="3" fill="#fff" />
+        </svg>
+      </button>
+      <button id="btnCatFav" class="btn tab-btn" title="Обране">
+        <svg class="tab-icon" viewBox="0 0 100 100" aria-hidden="true">
+          <polygon points="50,2 63,38 100,38 69,59 82,95 50,75 18,95 31,59 0,38 37,38" fill="currentColor" />
+        </svg>
+      </button>
+    </div>
+    <div id="categoryList" class="category-list"></div>
   </aside>
 
   <main class="main" id="mainArea">
     <div class="topbar">
-      <input id="search" class="search" placeholder="Пошук по всім категоріям..." />
-      <button id="clearSearch" class="btn">✕</button>
-      <button id="btnSettings" type="button" class="btn icon-btn" aria-label="Налаштування">⚙️</button>
+      <div class="search-wrap" id="mainSearchWrap">
+        <button id="btnSearchToggle" class="search-btn" aria-label="Пошук шаблонів">
+          <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
+        </button>
+        <input id="search" class="search search-input" placeholder="Пошук шаблонів..." />
+      </div>
+      <button id="clearSearch" class="btn close-btn" aria-label="Очистити пошук"><svg class="close-icon" viewBox="0 0 100 100" aria-hidden="true"><path d="M20,20 L80,80" /><path d="M80,20 L20,80" /></svg></button>
+      <button id="btnSettings" type="button" class="btn gear-btn" aria-label="Налаштування">
+        <svg viewBox="0 0 24 24" class="gear-icon" aria-hidden="true">
+          <path d="M12 8.2 A3.8 3.8 0 1 1 12 15.8 A3.8 3.8 0 1 1 12 8.2 M12 2 L13.2 2 L14 4.2 L16.2 5 L18.3 3.9 L20.1 5.7 L19 7.8 L19.8 10 L22 10.8 L22 13.2 L19.8 14 L19 16.2 L20.1 18.3 L18.3 20.1 L16.2 19 L14 19.8 L13.2 22 L10.8 22 L10 19.8 L7.8 19 L5.7 20.1 L3.9 18.3 L5 16.2 L4.2 14 L2 13.2 L2 10.8 L4.2 10 L5 7.8 L3.9 5.7 L5.7 3.9 L7.8 5 L10 4.2 Z" fill="currentColor" fill-rule="evenodd"/>
+        </svg>
+      </button>
       <div style="display:flex;gap:8px;margin-left:8px">
-        <button id="btnAdd" class="btn">Додати</button>
-        <button id="btnEditMode" class="btn">Редагування</button>
-        <button id="btnSelectAll" class="btn" style="display:none">Виділити все</button>
-        <button id="btnDeleteSelected" class="btn" style="display:none">Видалити</button>
-        <button id="btnEditSelected" class="btn" style="display:none">Редагувати</button>
-        <button id="btnCancelSelection" class="btn cancel" style="display:none">Скасувати</button>
+        <button id="btnAdd" class="btn primary">Додати</button>
+        <button id="btnEditMode" class="btn primary">Редагування</button>
+        <button id="btnSelectAll" class="btn primary" style="display:none">Виділити все</button>
+        <button id="btnDeleteSelected" class="btn warning" style="display:none">Видалити</button>
+        <button id="btnEditSelected" class="btn primary" style="display:none">Редагувати</button>
+        <button id="btnCancelSelection" class="btn warning" style="display:none">Скасувати</button>
       </div>
       <div style="flex:1"></div>
       <div style="display:flex;gap:8px;align-items:center">
-        <button id="btnTheme" class="btn theme-toggle" aria-label="Тема"></button>
-        <button id="btnImportExport" class="btn">Імпорт / Експорт</button>
-        <button id="btnHotkeys" class="btn warning" title="Гарячі клавіші 1–0">Hotkeys</button>
+        <button id="btnTheme" class="btn theme-toggle active" aria-label="Тема">
+          <svg class="theme-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path id="moon" class="moon" d="M21 12.8 A9 9 0 1 1 11.2 3 A7 7 0 0 0 21 12.8" />
+            <g id="sun" class="sun">
+              <circle cx="12" cy="12" r="4" />
+              <line x1="12" y1="2" x2="12" y2="5" />
+              <line x1="12" y1="19" x2="12" y2="22" />
+              <line x1="2" y1="12" x2="5" y2="12" />
+              <line x1="19" y1="12" x2="22" y2="12" />
+              <line x1="4.5" y1="4.5" x2="6.5" y2="6.5" />
+              <line x1="17.5" y1="17.5" x2="19.5" y2="19.5" />
+              <line x1="4.5" y1="19.5" x2="6.5" y2="17.5" />
+              <line x1="17.5" y1="6.5" x2="19.5" y2="4.5" />
+            </g>
+          </svg>
+        </button>
+        <button id="btnImportExport" class="btn primary">Імпорт / Експорт</button>
+        <button id="btnHotkeys" class="btn hotkey-btn" title="Гарячі клавіші 1–0">Hotkeys<span class="dot"></span></button>
       </div>
     </div>
 
@@ -361,21 +757,22 @@ body.dark .btn.theme-toggle::before{
 <div id="tileContextMenu" class="context-menu" aria-hidden="true"></div>
 
 <!-- Settings modal -->
+<div id="modalSettings" class="modalWrap" aria-hidden="true">
   <div class="modal" role="dialog">
     <div class="modal-header">
       <div>
         <h2>Налаштування</h2>
         <p class="modal-note">Швидко налаштуйте фон та масштаб карток для зручнішої роботи.</p>
       </div>
-      <button id="btnCloseSettings" class="btn close-btn">×</button>
+      <button id="btnCloseSettings" class="btn close-btn" aria-label="Закрити"><svg class="close-icon" viewBox="0 0 100 100" aria-hidden="true"><path d="M20,20 L80,80" /><path d="M80,20 L20,80" /></svg></button>
     </div>
     <div class="settings-panel">
       <div class="settings-group">
         <div class="settings-row"><span>Фон</span></div>
         <input id="bgFile" type="file" accept="image/*" />
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
-          <button id="bgApply" class="btn">Застосувати</button>
-          <button id="bgClear" class="btn">Очистити</button>
+          <button id="bgApply" class="btn primary">Застосувати</button>
+          <button id="bgClear" class="btn warning">Очистити</button>
         </div>
         <div class="hint">Завантажте зображення, PNG з прозорістю збережеться прозорим.</div>
         <div id="bgStatus" class="small" style="margin-top:8px"></div>
@@ -383,7 +780,7 @@ body.dark .btn.theme-toggle::before{
       <div class="settings-group">
         <div class="settings-row"><span>Масштаб плиток</span><span id="zoomValue">100%</span></div>
         <input id="zoomRange" class="settings-slider" type="range" min="0.7" max="1.6" step="0.05" value="1" />
-        <div class="hint">Регулюйте розмір карток для зручного перегляду.</div>
+        <div class="hint">Регулюйте розмір карток для зручнішого перегляду.</div>
       </div>
     </div>
   </div>
@@ -392,32 +789,38 @@ body.dark .btn.theme-toggle::before{
 <!-- Editor modal -->
 <div id="modalEditor" class="modalWrap" aria-hidden="true">
   <div class="modal" role="dialog">
-    <h3>Редактор шаблону</h3>
-    <div class="note">Поля: Title, Category, Tags, Emoji, Image, Text, Favorite</div>
-
-    <div style="display:flex;gap:8px;margin-bottom:8px">
-      <input id="eTitle" class="input" placeholder="Title" style="flex:1" />
-      <input id="eCategory" class="input" placeholder="Category" style="width:180px" />
+    <div class="modal-header">
+      <div>
+        <h3>Редактор шаблону</h3>
+        <p class="modal-note">Відредагуйте назву, категорію, теги та текст шаблону.</p>
+      </div>
+      <button id="btnCloseEditor" class="btn close-btn" aria-label="Закрити"><svg class="close-icon" viewBox="0 0 100 100" aria-hidden="true"><path d="M20,20 L80,80" /><path d="M80,20 L20,80" /></svg></button>
     </div>
 
-    <div style="display:flex;gap:8px;margin-bottom:8px">
-      <input id="eTags" class="input" placeholder="Tags (через кому)" style="flex:1" />
-      <input id="eEmoji" class="input" placeholder="Emoji" style="width:120px" />
+    <div class="modal-body">
+      <div class="field-row">
+        <input id="eTitle" class="input" placeholder="Назва" />
+        <input id="eCategory" class="input" placeholder="Категорія" />
+      </div>
+
+      <div class="field-row field-row--compact">
+        <input id="eTags" class="input" placeholder="Теги" />
+        <input id="eEmoji" class="input" placeholder="Емоджі" />
+        <label class="field-checkbox"><input id="eFavorite" type="checkbox" /> <span>Обране</span></label>
+      </div>
+
+      <div class="field-row">
+        <textarea id="eText" rows="8" class="input" placeholder="Текст шаблону"></textarea>
+      </div>
+
+      <div class="field-row">
+        <input id="eImage" type="file" accept="image/*" />
+      </div>
     </div>
 
-    <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
-      <input id="eImage" type="file" accept="image/*" />
-      <label style="display:flex;align-items:center;gap:8px"><input id="eFavorite" type="checkbox" /> <span class="small">Обране</span></label>
-    </div>
-
-    <div style="margin-bottom:8px">
-      <textarea id="eText" rows="8" class="input" style="width:100%" placeholder="Text"></textarea>
-    </div>
-
-    <div style="display:flex;gap:8px">
-      <button id="eSave" class="btn">Зберегти</button>
-      <button id="eDelete" class="btn">Видалити</button>
-      <button id="eClose" class="btn">Закрити</button>
+    <div class="modal-actions">
+      <button id="eSave" class="btn primary">Зберегти</button>
+      <button id="eDelete" class="btn warning">Видалити</button>
     </div>
   </div>
 </div>
@@ -427,7 +830,7 @@ body.dark .btn.theme-toggle::before{
   <div class="modal" role="dialog">
     <div class="modal-header">
       <h3>Імпорт / Експорт</h3>
-      <button id="btnImportClose" class="btn close-btn" aria-label="Закрити">×</button>
+      <button id="btnImportClose" class="btn close-btn" aria-label="Закрити"><svg class="close-icon" viewBox="0 0 100 100" aria-hidden="true"><path d="M20,20 L80,80" /><path d="M80,20 L20,80" /></svg></button>
     </div>
     <p class="modal-note">Імпортуйте з JSON/XLSX або CSV, експортуйте в JSON.</p>
 
@@ -435,14 +838,14 @@ body.dark .btn.theme-toggle::before{
       <div class="import-panel">
         <div class="panel-title">Файл (JSON/XLSX)</div>
         <input id="importFile" type="file" accept=".json,.xlsx,.xls" />
-        <button id="btnLoadFilePreview" class="btn full">Переглянути</button>
+        <button id="btnLoadFilePreview" class="btn primary full">Переглянути</button>
       </div>
 
       <div class="import-panel">
         <div class="panel-title">CSV</div>
         <input id="gsCsvLink" class="input" placeholder="CSV link" />
         <div class="import-actions">
-          <button id="btnLoadCsvPreview" class="btn">Переглянути</button>
+          <button id="btnLoadCsvPreview" class="btn primary">Переглянути</button>
           <button id="btnAutoImport" class="btn primary">Автоімпорт</button>
         </div>
       </div>
@@ -453,7 +856,7 @@ body.dark .btn.theme-toggle::before{
         <div class="panel-title">Експорт</div>
         <div class="hint">Завантажте всі шаблони у JSON.</div>
       </div>
-      <button id="btnExportJson" class="btn">Експорт JSON</button>
+      <button id="btnExportJson" class="btn primary">Експорт JSON</button>
     </div>
 
     <div id="previewArea" style="display:none;margin-top:8px">
@@ -479,8 +882,8 @@ body.dark .btn.theme-toggle::before{
       </div>
 
       <div style="display:flex;gap:8px;margin-top:12px">
-        <button id="btnConfirmImport" class="btn">Імпортувати підтверджені рядки</button>
-        <button id="btnCancelPreview" class="btn cancel">Скасувати</button>
+        <button id="btnConfirmImport" class="btn primary">Імпортувати підтверджені рядки</button>
+        <button id="btnCancelPreview" class="btn warning">Скасувати</button>
       </div>
     </div>
 
@@ -508,6 +911,7 @@ body.dark .btn.theme-toggle::before{
   const CATEGORY_ORDER_KEY = 'categoryOrder';
   const BG_KEY = 'mainBackground';
   const THEME_KEY = 'themePreference';
+  const DEFAULT_CSV_IMPORT_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSK7Pw9yTYj7PzsyFaeaUP8PmfegdxYR900xhC0MKgeZ9DQ-zCimnNMFarxdsBKXSBp9lm3LOfM8MP7/pub?output=csv';
   const UI_TILE_KEY = 'uiTileWidth';
   const UNDO_TIMEOUT_MS = 9000;
 
@@ -608,12 +1012,12 @@ body.dark .btn.theme-toggle::before{
     };
     if(q){
       const results = templates.filter(matchesSearch);
-      if(currentCategory === '📌 Обране') return results.filter(t => t.favorite);
+      if(currentCategory === '⭐ Обране') return results.filter(t => t.favorite);
       return results;
     }
     return templates.filter(t => {
       if(currentCategory === 'Усі') return true;
-      if(currentCategory === '📌 Обране') return t.favorite;
+      if(currentCategory === '⭐ Обране') return t.favorite;
       if(currentCategory.includes('/')) return t.category === currentCategory;
       return t.category === currentCategory || t.category.startsWith(currentCategory + '/');
     });
@@ -763,10 +1167,17 @@ body.dark .btn.theme-toggle::before{
     }
     if(!window.Sortable) return;
     sortableTemplates = Sortable.create(grid, {
-      animation: 150,
+      animation: 220,
+      easing: 'cubic-bezier(0.22,0.61,0.36,1)',
       draggable: '.tile:not(.pinned)',
       handle: '.tile',
+      ghostClass: 'sortable-ghost',
+      chosenClass: 'sortable-chosen',
+      dragClass: 'sortable-drag',
+      dataIdAttr: 'data-id',
+      onStart: (evt) => { evt.item.classList.add('dragging'); },
       onEnd: (evt) => {
+        evt.item.classList.remove('dragging');
         const ids = Array.from(grid.children).map(ch => ch.dataset && ch.dataset.id ? ch.dataset.id : null).filter(Boolean);
         const pinnedItems = templates.filter(t => t.pinned);
         const unpinnedItems = templates.filter(t => !t.pinned);
@@ -867,7 +1278,7 @@ body.dark .btn.theme-toggle::before{
         const tileEl = document.querySelector(`.tile[data-id="${id}"]`);
         if(tileEl){
           tileEl.classList.add('just-copied');
-          setTimeout(()=> tileEl.classList.remove('just-copied'), 420);
+          setTimeout(()=> tileEl.classList.remove('just-copied'), 320);
         }
 
         if(!silent) toast(`Скопійовано: «${t.title}»`);
@@ -887,7 +1298,7 @@ body.dark .btn.theme-toggle::before{
           const tileEl = document.querySelector(`.tile[data-id="${id}"]`);
           if(tileEl){
             tileEl.classList.add('just-copied');
-            setTimeout(()=> tileEl.classList.remove('just-copied'), 420);
+            setTimeout(()=> tileEl.classList.remove('just-copied'), 320);
           }
           if(!silent) toast(`Скопійовано: «${t.title}»`);
         }catch(err){
@@ -910,7 +1321,7 @@ body.dark .btn.theme-toggle::before{
         const tileEl = document.querySelector(`.tile[data-id="${id}"]`);
         if(tileEl){
           tileEl.classList.add('just-copied');
-          setTimeout(()=> tileEl.classList.remove('just-copied'), 420);
+          setTimeout(()=> tileEl.classList.remove('just-copied'), 320);
         }
         if(!silent) toast(`Скопійовано: «${t.title}»`);
       }catch(err){
@@ -1033,7 +1444,7 @@ body.dark .btn.theme-toggle::before{
   let currentPreviewMapping = null;
   let previewFileName = '';
 
-  function showImportModal(){ $('modalImport').classList.add('show'); $('modalImport').setAttribute('aria-hidden','false'); }
+  function showImportModal(){ const csv = $('gsCsvLink'); if(csv && !csv.value.trim()){ csv.value = DEFAULT_CSV_IMPORT_URL; } $('modalImport').classList.add('show'); $('modalImport').setAttribute('aria-hidden','false'); }
   function hideImportModal(){ $('modalImport').classList.remove('show'); $('modalImport').setAttribute('aria-hidden','true'); resetPreview(); }
 
   function resetPreview(){
@@ -1249,8 +1660,10 @@ body.dark .btn.theme-toggle::before{
 
   // parse CSV link preview
   safeOn($('btnLoadCsvPreview'), 'click', async ()=>{
-    const url = $('gsCsvLink').value.trim();
+    const urlInput = $('gsCsvLink').value.trim();
+    const url = urlInput || DEFAULT_CSV_IMPORT_URL;
     if(!url){ alert('Вставте CSV link'); return; }
+    $('gsCsvLink').value = url;
     try{
       const res = await fetch(url);
       if(!res.ok) throw new Error('HTTP ' + res.status);
@@ -1302,24 +1715,50 @@ body.dark .btn.theme-toggle::before{
 
   // import modal bindings
   safeOn($('btnImportExport'), 'click', ()=>{ showImportModal(); });
+  safeOn($('btnImportClose'), 'click', ()=>{ hideImportModal(); });
   safeOn($('btnLoadFilePreview'), 'click', ()=>{ /* handled above */ });
   safeOn($('btnLoadCsvPreview'), 'click', ()=>{ /* handled above */ });
+  safeOn($('btnAutoImport'), 'click', ()=>{
+    const url = $('gsCsvLink').value.trim() || DEFAULT_CSV_IMPORT_URL;
+    $('gsCsvLink').value = url;
+    importCsvLinkDirect(url);
+  });
 
   // background handlers inside settings modal
   safeOn($('bgClear'), 'click', ()=>{ $('mainArea').style.backgroundImage=''; localStorage.removeItem(BG_KEY); $('bgStatus').textContent='Очищено'; setTimeout(()=>$('bgStatus').textContent='',800); });
   safeOn($('bgApply'), 'click', ()=>{ const f = $('bgFile'); if(!f||!f.files||!f.files[0]){ $('bgStatus').textContent='Виберіть файл'; return; } const r = new FileReader(); r.onload = e => { const src = e.target.result; $('mainArea').style.backgroundImage = `url(${src})`; localStorage.setItem(BG_KEY, src); $('bgStatus').textContent='Застосовано'; setTimeout(()=>{ $('bgStatus').textContent=''; },1200); }; r.readAsDataURL(f.files[0]); });
 
+  function createButtonRipple(button, e){
+    if(!button) return;
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    const rect = button.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = ((e?.clientX || rect.left + rect.width / 2) - rect.left - size / 2) + 'px';
+    ripple.style.top = ((e?.clientY || rect.top + rect.height / 2) - rect.top - size / 2) + 'px';
+    button.appendChild(ripple);
+    setTimeout(()=> ripple.remove(), 600);
+  }
+
   function showSettingsModal(){ const modal = $('modalSettings'); if(modal){ modal.classList.add('show'); modal.setAttribute('aria-hidden','false'); } }
-  function hideSettingsModal(){ const modal = $('modalSettings'); if(modal){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); } }
+  function hideSettingsModal(){ const modal = $('modalSettings'); if(modal){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); } const btn = $('btnSettings'); if(btn){ btn.classList.remove('active'); } }
+  function openSettingsWithEffects(e){
+    const btn = $('btnSettings');
+    createButtonRipple(btn, e);
+    if(btn){ btn.classList.add('active'); }
+    showSettingsModal();
+  }
+  window.openSettingsWithEffects = openSettingsWithEffects;
 
   // editor bindings
   safeOn($('btnAdd'), 'click', ()=> openEditor(null));
-  safeOn($('eClose'), 'click', ()=> closeEditor());
+  safeOn($('btnCloseEditor'), 'click', ()=> closeEditor());
   safeOn($('eSave'), 'click', ()=> saveTemplate());
   safeOn($('eDelete'), 'click', ()=> { if(confirm('Ви впевнені?')) deleteCurrentTemplate(); });
 
   // selection & other bindings
-  safeOn($('btnSettings'), 'click', showSettingsModal);
+  safeOn($('btnSettings'), 'click', openSettingsWithEffects);
   safeOn($('btnCloseSettings'), 'click', hideSettingsModal);
   safeOn($('btnEditMode'), 'click', ()=> { editMode = !editMode; $('btnEditMode').classList.toggle('active', editMode); if(!editMode) clearSelection(); syncSelectionUI(); });
   safeOn($('btnSelectAll'), 'click', ()=> selectAllVisible());
@@ -1338,36 +1777,49 @@ body.dark .btn.theme-toggle::before{
   // storage sync
   window.addEventListener('storage', (e)=>{ if(e.key === STORAGE_KEY){ try{ const parsed = JSON.parse(e.newValue); if(Array.isArray(parsed)){ templates = parsed.map(ensureShape); renderTemplates(); } }catch(err){ console.warn(err); } } if(e.key === CATEGORY_ORDER_KEY){ try{ const parsed = JSON.parse(e.newValue); if(Array.isArray(parsed)){ categoryOrder = parsed; renderCategories(); } }catch(err){ console.warn(err); } } if(e.key === BG_KEY){ const bg = localStorage.getItem(BG_KEY); $('mainArea').style.backgroundImage = bg ? `url(${bg})` : ''; } });
 
+  // logo helper
+  function updateLogo(){
+    const isDark = document.body.classList.contains('dark');
+    const logo = document.getElementById('logo');
+    if(!logo) return;
+    logo.src = isDark ? 'dark_theme.png' : 'light_theme.png';
+  }
+
   // render categories
   function renderCategories(){
     const wrap = $('categoryList');
     if(!wrap) return;
-    const allCats = Array.from(new Set(templates.map(t=>t.category)));
+    const allCats = Array.from(new Set(templates.map(t=>t.category))).sort((a,b)=>a.localeCompare(b,'uk',{sensitivity:'base',numeric:true}));
+    const GROUP_KEY = '__group__:';
     allCats.forEach(c => { if(!categoryOrder.includes(c)) categoryOrder.push(c); });
-    categoryOrder = categoryOrder.filter(c => allCats.includes(c));
-    wrap.innerHTML = '';
+    categoryOrder = categoryOrder.filter(c => allCats.includes(c) || c.startsWith(GROUP_KEY));
 
-    const base = ['Усі','📌 Обране'];
-    base.forEach(b=>{
-      const btn = document.createElement('button');
-      btn.className = 'category-btn' + (b===currentCategory ? ' active' : '');
-      btn.textContent = b;
-      btn.onclick = ()=>{ currentCategory = b; clearSelection(); renderTemplates(); };
-      wrap.appendChild(btn);
+    const parentOrder = [];
+    categoryOrder.forEach(cat => {
+      const parent = cat.startsWith(GROUP_KEY) ? cat.slice(GROUP_KEY.length) : cat.split('/')[0].trim();
+      if(parent && !parentOrder.includes(parent)) parentOrder.push(parent);
+    });
+    allCats.forEach(cat => {
+      const parent = cat.split('/')[0].trim();
+      if(parent && !parentOrder.includes(parent)) parentOrder.push(parent);
     });
 
+    wrap.innerHTML = '';
+
     const nested = {};
-    categoryOrder.forEach(cat => {
+    allCats.forEach(cat => {
       const parts = cat.split('/').map(s => s.trim()).filter(Boolean);
       if(parts.length === 0) return;
       const parent = parts[0];
       const child = parts.slice(1).join('/');
       if(!nested[parent]) nested[parent] = new Set();
       if(child) nested[parent].add(child);
-      if(!child) nested[parent].add('');
+      else nested[parent].add('');
     });
 
-    Object.keys(nested).forEach(parent => {
+    parentOrder.forEach(parent => {
+      const items = nested[parent];
+      if(!items) return;
       if(currentCategory.startsWith(parent + '/')) openCategories.add(parent);
       const group = document.createElement('div');
       group.className = 'category-group';
@@ -1376,6 +1828,7 @@ body.dark .btn.theme-toggle::before{
       const parentBtn = document.createElement('button');
       parentBtn.className = 'category-btn' + (parent===currentCategory ? ' active' : '');
       parentBtn.textContent = parent;
+      parentBtn.dataset.category = GROUP_KEY + parent;
       parentBtn.onclick = ()=>{
         if(openCategories.has(parent)){
           openCategories.delete(parent);
@@ -1391,14 +1844,14 @@ body.dark .btn.theme-toggle::before{
 
       const childWrap = document.createElement('div');
       childWrap.className = 'category-child-wrap';
-      if(openCategories.has(parent)) childWrap.style.maxHeight = '400px';
 
-      const children = Array.from(nested[parent]).filter(c => c).sort();
+      const children = Array.from(items).filter(c => c).sort((a,b)=>a.localeCompare(b,'uk',{sensitivity:'base',numeric:true}));
       children.forEach(child => {
         const fullName = parent + '/' + child;
         const childBtn = document.createElement('button');
         childBtn.className = 'category-btn' + (fullName===currentCategory ? ' active' : '');
         childBtn.textContent = '• ' + child;
+        childBtn.dataset.category = fullName;
         childBtn.onclick = ()=>{
           openCategories.add(parent);
           currentCategory = fullName;
@@ -1418,7 +1871,7 @@ body.dark .btn.theme-toggle::before{
         animation: 150,
         handle: '.category-btn',
         onEnd: function(){
-          const items = Array.from(wrap.querySelectorAll('.category-btn')).map(b=>b.textContent).filter(t=>t!=='Усі' && t!=='📌 Обране');
+          const items = Array.from(wrap.querySelectorAll('.category-btn')).map(b=>b.dataset.category).filter(Boolean);
           categoryOrder = items;
           persist();
         }
@@ -1429,13 +1882,25 @@ body.dark .btn.theme-toggle::before{
   // init
   function init(){
     const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
-    if(savedTheme === 'dark') document.body.classList.add('dark'); else document.body.classList.remove('dark');
+    const btnTheme = $('btnTheme');
+    if(savedTheme === 'dark'){
+      document.body.classList.add('dark');
+      document.body.classList.remove('light');
+    } else {
+      document.body.classList.remove('dark');
+      document.body.classList.add('light');
+    }
+    if(btnTheme) btnTheme.classList.add('active');
     updateLogo();
-    safeOn($('btnTheme'), 'click', ()=> {
-      const isDark = document.body.classList.toggle('dark');
-      localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
-      updateLogo();
-    });
+    if(btnTheme){
+      safeOn(btnTheme, 'click', (e)=>{
+        createButtonRipple(btnTheme, e);
+        const isDark = document.body.classList.toggle('dark');
+        document.body.classList.toggle('light', !isDark);
+        localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
+        updateLogo();
+      });
+    }
 
     const zoomRange = $('zoomRange');
     const zoomValue = $('zoomValue');
@@ -1448,10 +1913,92 @@ body.dark .btn.theme-toggle::before{
       zoomRange.addEventListener('input', (e)=>{ const base=220; let w=Math.round(base * parseFloat(e.target.value)); const min=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tile-min'))||160; const max=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tile-max'))||360; if(w<min) w=min; if(w>max) w=max; document.documentElement.style.setProperty('--tile', w+'px'); localStorage.setItem(UI_TILE_KEY, String(w)); if(zoomValue) zoomValue.textContent = Math.round(parseFloat(e.target.value) * 100) + '%'; setTimeout(()=>renderTemplates(),120); });
     }
 
+    const categorySearch = $('categorySearch');
+    const categorySearchWrap = $('categorySearchWrap');
+    const sidebarActions = document.querySelector('.sidebar-actions');
+    const btnCatSearch = $('btnCatSearch');
+    const btnCatAll = $('btnCatAll');
+    const btnCatFav = $('btnCatFav');
+    const searchInput = $('search');
+    const searchToggleBtn = $('btnSearchToggle');
+    const clearSearchBtn = $('clearSearch');
+    const mainSearchWrap = $('mainSearchWrap');
+
+    function filterCategoryButtons(query){
+      const q = String(query || '').trim().toLowerCase();
+      document.querySelectorAll('#categoryList .category-group').forEach(group => {
+        const parentBtn = group.querySelector('.category-btn');
+        const childWrap = group.querySelector('.category-child-wrap');
+        const childBtns = Array.from(childWrap.querySelectorAll('.category-btn'));
+        const parentMatches = parentBtn && parentBtn.textContent.toLowerCase().includes(q);
+        let anyChildMatches = false;
+
+        childBtns.forEach(btn => {
+          const match = q && btn.textContent.toLowerCase().includes(q);
+          btn.style.display = q && !match ? 'none' : '';
+          if(match) anyChildMatches = true;
+        });
+
+        const showGroup = !q || parentMatches || anyChildMatches;
+        group.style.display = showGroup ? '' : 'none';
+        group.classList.toggle('open', q && (parentMatches || anyChildMatches));
+      });
+    }
+
+    function updateSearchControls(){
+      const open = mainSearchWrap?.classList.contains('open');
+      if(clearSearchBtn){
+        clearSearchBtn.style.display = open && searchInput && searchInput.value.trim() ? 'inline-flex' : 'none';
+      }
+      if(searchToggleBtn){
+        searchToggleBtn.classList.toggle('active', open);
+      }
+    }
+
+    function updateCategoryTabs(){
+      if(btnCatAll) btnCatAll.classList.toggle('active', currentCategory === 'Усі');
+      if(btnCatFav) btnCatFav.classList.toggle('active', currentCategory === '⭐ Обране');
+      if(btnCatSearch) btnCatSearch.classList.toggle('active', categorySearchWrap?.classList.contains('open'));
+      if(sidebarActions) sidebarActions.classList.toggle('hidden', categorySearchWrap?.classList.contains('open'));
+    }
+
+    if(btnCatAll) safeOn(btnCatAll, 'click', ()=>{ currentCategory = 'Усі'; clearSelection(); if(categorySearchWrap) categorySearchWrap.classList.remove('open'); if(sidebarActions) sidebarActions.classList.remove('hidden'); updateCategoryTabs(); renderCategories(); renderTemplates(); });
+    if(btnCatFav) safeOn(btnCatFav, 'click', ()=>{ currentCategory = '⭐ Обране'; clearSelection(); if(categorySearchWrap) categorySearchWrap.classList.remove('open'); if(sidebarActions) sidebarActions.classList.remove('hidden'); updateCategoryTabs(); renderCategories(); renderTemplates(); });
+    if(btnCatSearch) safeOn(btnCatSearch, 'click', ()=>{
+      if(!categorySearchWrap) return;
+      const open = categorySearchWrap.classList.toggle('open');
+      if(sidebarActions) sidebarActions.classList.toggle('hidden', open);
+      btnCatSearch.classList.toggle('active', open);
+      if(open){ categorySearch?.focus(); } else { if(categorySearch){ categorySearch.value=''; filterCategoryButtons(''); } }
+    });
+    if(categorySearch) safeOn(categorySearch, 'input', (e)=> filterCategoryButtons(e.target.value || ''));
+
+    if(searchToggleBtn) safeOn(searchToggleBtn, 'click', ()=>{
+      if(!mainSearchWrap) return;
+      const open = mainSearchWrap.classList.toggle('open');
+      if(open){ searchInput?.focus(); } else {
+        if(searchInput) searchInput.value='';
+        clearSelection();
+        renderTemplates();
+      }
+      updateSearchControls();
+    });
+    if(clearSearchBtn) safeOn(clearSearchBtn, 'click', ()=>{
+      if(searchInput) searchInput.value='';
+      clearSelection();
+      renderTemplates();
+      if(mainSearchWrap) mainSearchWrap.classList.remove('open');
+      updateSearchControls();
+    });
+    if(searchInput) safeOn(searchInput, 'input', ()=> updateSearchControls());
+
     const savedBg = localStorage.getItem(BG_KEY);
     if(savedBg) $('mainArea').style.backgroundImage = `url(${savedBg})`;
 
     renderCategories(); renderTemplates();
+    updateCategoryTabs();
+    updateSearchControls();
+    if(categorySearch && categorySearch.value){ filterCategoryButtons(categorySearch.value); }
   }
 
   document.addEventListener('DOMContentLoaded', init);
@@ -1543,345 +2090,6 @@ body.dark .btn.theme-toggle::before{
       isEnabled: ()=> hotkeysEnabled
     };
   })();
-
-})();
-</script>
-<script>
-// ===== FINAL STABLE FIX =====
-window.__hotkeysEnabled = true;
-window.AUTO_IMPORT_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSK7Pw9yTYj7PzsyFaeaUP8PmfegdxYR900xhC0MKgeZ9DQ-zCimnNMFarxdsBKXSBp9lm3LOfM8MP7/pub?output=csv";
-//Фільтрація шаблонів за пошуком і категорією//
-window.getFilteredTemplates = function() {
-  const search = document.getElementById('search')?.value?.toLowerCase() || '';
-  const category = window.currentCategory || 'all';
-
-  return (window.templates || []).filter(t => {
-
-    const titleMatch = (t.title || '').toLowerCase().includes(search);
-
-    if (category === 'all') return titleMatch;
-
-    if (!category.includes('/')) {
-      return titleMatch && (t.category || '').startsWith(category);
-    }
-
-    return titleMatch && t.category === category;
-  });
-};
-// 2. PATCH RENDER
-(function waitAndPatch(){
-  if (!window.render) return setTimeout(waitAndPatch, 100);
-  if (window.__renderPatched) return;
-
-  window.__renderPatched = true;
-
-  const originalRender = window.render;
-
-  window.render = function() {
-    originalRender();
-    window.filteredTemplates = window.getFilteredTemplates();
-
-    setTimeout(() => {
-      window.renderHotkeyBadges?.();
-      window.updatePreviewState?.();
-    }, 0);
-  };
-
-})();
-
-// 3. HOTKEYS
-window.applyImportedData = function(data) {
-  if (!Array.isArray(data)) return;
-
-  const parsed = data.map((row, i) => {
-
-    const values = Object.values(row);
-
-    const title =
-      row.title ||
-      values[0] ||
-      'No title';
-
-    const text =
-      row.text ||
-      values[1] ||
-      '';
-
-    let rawCategory =
-      row.category ||
-      values[5] ||
-      'Other';
-
-    let category = rawCategory
-      .replace(/[,|\-]+/g, '/')
-      .replace(/\s*\/\s*/g, '/')
-      .split('/')
-      .map(s => s.trim())
-      .filter(Boolean)
-      .join('/');
-
-    return {
-      id: Date.now() + i,
-      title,
-      text,
-      category,
-      tags: ''
-    };
-  });
-
-  window.templates.length = 0;
-  window.templates.push(...parsed);
-  console.log(window.templates.map(t => t.category));
-  localStorage.setItem('brainTemplates', JSON.stringify(window.templates));
-  window.render?.();
-};
-// 5. SAFE BIND
-window.safeBind = function(id, event, handler){
-  const el = document.getElementById(id);
-  if (!el || el._binded) return;
-  el._binded = true;
-  el.addEventListener(event, handler);
-};
-
-
-// ===== BUTTONS + UI FIX (CLEAN) =====
-setTimeout(() => {
-
-  // 🔥 HOTKEYS toggle
-  const hotBtn = document.getElementById('btnHotkeys');
-  if (hotBtn) {
-    hotBtn.onclick = () => {
-      window.__hotkeysEnabled = !window.__hotkeysEnabled;
-      console.log('Hotkeys:', window.__hotkeysEnabled);
-    };
-  }
-
-  // 🔥 Закрытие импорта
-  const closeImport = document.getElementById('btnImportClose');
-  if (closeImport) {
-    closeImport.onclick = () => {
-      document.getElementById('modalImport')?.classList.remove('show');
-    };
-  }
-
-  // 🔥 АВТОИМПОРТ (Google Sheets)
-  const autoBtn = document.getElementById('btnAutoImport');
-  if (autoBtn) {
-    autoBtn.onclick = async () => {
-      console.log('🚀 автоимпорт клик');
-
-      try {
-        const res = await fetch(window.AUTO_IMPORT_CSV);
-        const text = await res.text();
-
-        Papa.parse(text, {
-          header: true,
-          complete: r => {
-            console.log('CSV loaded', r.data);
-            applyImportedData(r.data);
-          }
-        });
-
-      } catch (err) {
-        console.error('Import error:', err);
-        alert('Помилка імпорту');
-      }
-    };
-  }
-
-  // 🔥 Очистка поиска (кнопка)
-  const clearBtn = document.getElementById('clearSearch');
-  if (clearBtn) {
-    clearBtn.onclick = () => {
-      const input = document.getElementById('search');
-      if (!input) return;
-
-      input.value = '';
-      window.render?.();
-    };
-  }
-
-  // 🔥 Автоочистка поиска (15 сек)
-  const searchInput = document.getElementById('search');
-  if (searchInput) {
-
-    let timer;
-
-    searchInput.addEventListener('input', () => {
-      clearTimeout(timer);
-
-      timer = setTimeout(() => {
-        searchInput.value = '';
-        window.render?.();
-      }, 15000);
-    });
-  }
-
-}, 500);
-
-
-// ===== LOGO AUTO SWITCH =====
-function updateLogo(){
-  const isDark = document.body.classList.contains('dark');
-  const logo = document.getElementById('logo');
-  if(!logo) return;
-
-  logo.src = isDark ? 'dark_theme.png' : 'light_theme.png';
-}
-
-setInterval(updateLogo, 500);
-</script>
-
-
-<script>
-// ===== CATEGORY PATCH =====
-(function(){
-
-function patchedRenderCategories(){
-
-  const box = document.getElementById('categories');
-  if(!box || !window.templates) return;
-
-  box.innerHTML = '';
-
-  const map = {};
-
-  window.templates.forEach(t => {
-
-    const parts = (t.category || 'Other')
-      .replace(',', '/')
-      .split('/')
-      .map(s => s.trim());
-
-    const parent = parts[0];
-    const child = parts[1];
-
-    if(!map[parent]) map[parent] = new Set();
-    if(child) map[parent].add(child);
-  });
-
-  Object.keys(map).forEach(parent => {
-
-    const parentBtn = document.createElement('button');
-    parentBtn.className = 'btn';
-    parentBtn.textContent = parent;
-
-    parentBtn.onclick = () => {
-      window.currentCategory = parent;
-      window.render?.();
-    };
-
-    box.appendChild(parentBtn);
-
-    map[parent].forEach(child => {
-
-      const sub = document.createElement('button');
-      sub.className = 'btn';
-      sub.textContent = '— ' + child;
-
-      sub.onclick = (e) => {
-        e.stopPropagation();
-        window.currentCategory = parent + '/' + child;
-        window.render?.();
-      };
-
-      box.appendChild(sub);
-    });
-
-  });
-}
-
-// 🔥 ВОТ ЭТОГО НЕ ХВАТАЛО
-window.renderCategories = patchedRenderCategories;
-
-})();
-</script>
-
-
-<script>
-// ===== CLEAN ADD UI =====
-(function(){
-
-  const modal = document.createElement('div');
-  modal.id = 'cleanAddModal';
-
-  modal.innerHTML = `
-    <div class="box">
-      <h3>Додати шаблон</h3>
-      <input id="cTitle" placeholder="Title"><br><br>
-      <textarea id="cText" placeholder="Text"></textarea><br><br>
-      <input id="cParent" placeholder="Категорія"><br><br>
-      <input id="cChild" placeholder="Підкатегорія"><br><br>
-      <button id="cSave" class="btn">Зберегти</button>
-      <button id="cClose" class="btn">Закрити</button>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-
-  const style = document.createElement('style');
-  style.innerHTML = `
-    #cleanAddModal{
-      position:fixed; inset:0;
-      background:rgba(0,0,0,.4);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:9999;
-    }
-    #cleanAddModal.show{display:flex}
-    #cleanAddModal .box{
-      background:var(--card);
-      padding:16px;
-      border-radius:12px;
-      width:320px;
-    }
-  `;
-  document.head.appendChild(style);
-
-  function openModal(){ modal.classList.add('show'); }
-  function closeModal(){ modal.classList.remove('show'); }
-
-  const wait = setInterval(()=>{
-    const btn = document.getElementById('addBtn');
-    if(!btn) return;
-
-    clearInterval(wait);
-    btn.onclick = openModal;
-  },100);
-
-  setTimeout(()=>{
-    document.getElementById('cClose').onclick = closeModal;
-
-    document.getElementById('cSave').onclick = ()=>{
-      const title = document.getElementById('cTitle').value;
-      const text = document.getElementById('cText').value;
-      const parent = document.getElementById('cParent').value || 'Other';
-      const child = document.getElementById('cChild').value;
-
-      let raw = child ? parent + '/' + child : parent;
-
-// 🔥 КЛЮЧЕВОЙ ФИКС
-let category = raw
-  .replace(',', '/')
-  .split('/')
-  .map(s => s.trim())
-  .filter(Boolean)
-  .join('/');
-
-      window.templates.push({
-        id: Date.now(),
-        title,
-        text,
-        category
-      });
-
-      localStorage.setItem('brainTemplates', JSON.stringify(window.templates));
-      closeModal();
-      window.render?.();
-    };
-
-  },300);
 
 })();
 </script>
