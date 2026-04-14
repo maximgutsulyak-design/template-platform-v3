@@ -901,6 +901,10 @@ body.dark .gear-btn{
       <div class="field-row">
         <input id="eImage" type="file" accept="image/*" />
       </div>
+      <div class="field-row">
+        <input id="eImageUrl" class="input" placeholder="URL іконки або шлях (наприклад icons/name.png)" />
+      </div>
+      <div class="hint">Якщо не завантажуєш файл, можна вказати URL або відносний шлях до іконки зі сховища.</div>
     </div>
 
     <div class="modal-actions">
@@ -1014,6 +1018,8 @@ body.dark .gear-btn{
 
   /* Оновлення існуючого шаблону при імпорті.
      Зберігає ідентифікатор, категорію, теги та дату оновлення. */
+  function isDataUrl(value){ return String(value||'').trim().startsWith('data:'); }
+
   /* Оновлює існуючий шаблон при імпорті схожих даних. */
   function updateExistingTemplate(existing, item){
     existing.title = item.title;
@@ -1021,7 +1027,18 @@ body.dark .gear-btn{
     existing.category = item.category || existing.category || 'Без категорії';
     existing.tags = item.tags || [];
     existing.emoji = item.emoji || '';
-    existing.image = item.image || '';
+    const incomingImage = String(item.image || '').trim();
+    if(incomingImage){
+      if(isDataUrl(incomingImage) && existing.image && !isDataUrl(existing.image)){
+        // Якщо вже є URL/шлях до іконки, не замінюємо його великим Base64 даними.
+      } else {
+        existing.image = incomingImage;
+      }
+    }
+    const incomingImageName = String(item.imageName || '').trim();
+    if(incomingImageName){
+      existing.imageName = incomingImageName;
+    }
     existing.updatedAt = Date.now();
   }
   /* Зливає імпортовані шаблони з поточними, уникаючи дублікатів. */
@@ -1065,6 +1082,31 @@ body.dark .gear-btn{
       hash |= 0;
     }
     return String(hash);
+  }
+
+  /* Нормалізує шлях до іконки: використовує папку icons/ для локальних імен файлів. */
+  function normalizeImagePath(value){
+    const image = String(value || '').trim();
+    if(!image) return '';
+    if(image.startsWith('data:')) return image;
+    if(/^https?:\/\//i.test(image) || image.startsWith('//')) return image;
+    const path = image.replace(/\\/g,'/').trim();
+    const basename = path.split('/').pop();
+    if(!basename) return '';
+    return `icons/${basename}`;
+  }
+
+  /* Визначає джерело зображення для шаблону: локальний data URL, відносний icons/ шлях або зовнішній URL. */
+  function resolveImageSource(item){
+    const rawImage = String(item.image || item['Image URL'] || '').trim();
+    const imageName = sanitizeText(item.imageName || item['Image Name'] || item['Image Filename'] || '');
+    if(rawImage.startsWith('data:')){
+      return imageName ? normalizeImagePath(imageName) : rawImage;
+    }
+    if(rawImage){
+      return normalizeImagePath(rawImage);
+    }
+    return imageName ? normalizeImagePath(imageName) : '';
   }
 
   /* Перевірка Google таблиці на оновлення.
@@ -1121,7 +1163,8 @@ body.dark .gear-btn{
       category: sanitizeText(item.category || item.Category || item.cat || 'Без категорії'),
       tags: parseTags(item.tags || item.Tags || item.TagsList || ''),
       emoji: Array.from((item.emoji || item.Emoji || '').toString()).slice(0,4).join(''),
-      image: (item.image || item['Image URL'] || '').toString().trim(),
+      image: resolveImageSource(item),
+      imageName: sanitizeText(item.imageName || item['Image Name'] || item['Image Filename'] || ''),
       favorite: Boolean(item.favorite || false),
       pinned: Boolean(item.pinned || false),
       usage: Number(item.usage || 0),
@@ -1771,10 +1814,12 @@ body.dark .gear-btn{
         $('eTags').value = (t.tags||[]).join(', ');
         $('eEmoji').value = t.emoji || '';
         $('eFavorite').checked = !!t.favorite;
+        if($('eImageUrl')) $('eImageUrl').value = (t.image && !String(t.image).startsWith('data:')) ? t.image : '';
       }
     } else {
       $('eTitle').value=''; $('eCategory').value=''; $('eText').value=''; $('eTags').value=''; $('eEmoji').value=''; $('eFavorite').checked=false;
       try{ $('eImage').value=''; }catch(e){}
+      if($('eImageUrl')) $('eImageUrl').value='';
     }
   }
 
@@ -1789,13 +1834,21 @@ body.dark .gear-btn{
     const emoji = $('eEmoji').value.trim();
     const favorite = !!$('eFavorite').checked;
     const file = $('eImage').files && $('eImage').files[0];
+    const imageUrl = $('eImageUrl') ? $('eImageUrl').value.trim() : '';
     if(!title && !text){ alert('Потрібні назва або текст'); return; }
     let imageData = '';
-    if(file) imageData = await fileToDataURL(file);
+    let imageName = '';
+    if(file){
+      imageData = await fileToDataURL(file);
+      imageName = file.name;
+    } else if(imageUrl){
+      imageData = imageUrl;
+      imageName = imageUrl.split('/').pop() || '';
+    }
     if(editingId){
-      templates = templates.map(t => t.id===editingId ? Object.assign({}, t, { title, category, text, tags, emoji, favorite, image: imageData || t.image, updatedAt: Date.now() }) : t);
+      templates = templates.map(t => t.id===editingId ? Object.assign({}, t, { title, category, text, tags, emoji, favorite, image: imageData || t.image, imageName: imageName || t.imageName || t.image, updatedAt: Date.now() }) : t);
     } else {
-      templates.unshift(ensureShape({ title, category, text, tags, emoji, image: imageData, favorite }));
+      templates.unshift(ensureShape({ title, category, text, tags, emoji, image: imageData, imageName, favorite }));
     }
     if(!categoryOrder.includes(category)) categoryOrder.push(category);
     persist(); renderTemplates(); closeEditor();
@@ -1989,6 +2042,24 @@ body.dark .gear-btn{
     return map;
   }
 
+  function findImageNameColumn(headerRow){
+    if(!Array.isArray(headerRow)) return -1;
+    for(let i=0;i<headerRow.length;i++){
+      const cell = headerRow[i];
+      if(!cell) continue;
+      const v = String(cell).toLowerCase();
+      if(v.includes('image name') || v.includes('image_name') || v.includes('filename') || v.includes('file name') || v.includes('file_name')) return i;
+    }
+    return -1;
+  }
+
+  function isHeaderRow(row){
+    if(!Array.isArray(row) || row.length < 3) return false;
+    const text = row.join(' ').toLowerCase();
+    const headers = ['title','text','category','tags','emoji','image'];
+    return headers.filter(h => text.includes(h)).length >= 2;
+  }
+
   // Обробник підтвердження імпорту.
   /* Обробляє підсумкове підтвердження імпорту. */
   function confirmImportHandler(){
@@ -2002,9 +2073,12 @@ body.dark .gear-btn{
 
       if(mapping.title < 0 && mapping.text < 0){ alert('Потрібно вказати колонку для Title або Text'); return; }
 
+      const headerRow = previewRowsData[0] || [];
+      const skipHeader = isHeaderRow(headerRow);
+      const imageNameIndex = findImageNameColumn(headerRow);
       const rows = previewRowsData.slice(0, Math.min(previewRowsData.length, 1000));
       const imported = [];
-      for(let r = 0; r < rows.length; r++){
+      for(let r = skipHeader ? 1 : 0; r < rows.length; r++){
         const row = rows[r] || [];
         const title = mapping.title >=0 ? String(row[mapping.title]||'').trim() : '';
         const category = mapping.category >=0 ? String(row[mapping.category]||'').trim() : 'Без категорії';
@@ -2012,9 +2086,10 @@ body.dark .gear-btn{
         const tagsRaw = mapping.tags >=0 ? String(row[mapping.tags]||'').trim() : '';
         const emoji = mapping.emoji >=0 ? String(row[mapping.emoji]||'').trim() : '';
         const image = mapping.image >=0 ? String(row[mapping.image]||'').trim() : '';
+        const imageName = imageNameIndex >=0 ? String(row[imageNameIndex]||'').trim() : '';
         if(!title && !text) continue;
         const tags = tagsRaw ? tagsRaw.split(/[,;]+/).map(t=>t.trim()).filter(Boolean) : [];
-        imported.push({ title, category: category || 'Без категорії', text: autoFix(text), tags, emoji, image });
+        imported.push({ title, category: category || 'Без категорії', text: autoFix(text), tags, emoji, image, imageName });
       }
 
       const result = mergeImportedTemplates(imported);
