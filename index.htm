@@ -1049,14 +1049,9 @@ body.dark .gear-btn{
       if(!shaped.title && !shaped.text) return;
       const exact = templates.find(existing => normalizeCompareText(existing.title) === normalizeCompareText(shaped.title) && normalizeCompareText(existing.text) === normalizeCompareText(shaped.text));
       if(exact){
-        if(normalizeCompareText(exact.category) !== normalizeCompareText(shaped.category)){
-          exact.category = shaped.category;
-          exact.updatedAt = Date.now();
-          if(shaped.category && !categoryOrder.includes(shaped.category)) categoryOrder.push(shaped.category);
-          updated++;
-        } else {
-          skipped++;
-        }
+        updateExistingTemplate(exact, shaped);
+        if(shaped.category && !categoryOrder.includes(shaped.category)) categoryOrder.push(shaped.category);
+        updated++;
         return;
       }
       const match = templates.find(existing => normalizeCompareText(existing.title) === normalizeCompareText(shaped.title) || normalizeCompareText(existing.text) === normalizeCompareText(shaped.text));
@@ -2034,15 +2029,23 @@ body.dark .gear-btn{
   /* Автоматично визначає мапінг на основі заголовку. */
   function detectMappingFromHeader(headerRow){
     const map = {category:-1,title:-1,text:-1,tags:-1,emoji:-1,image:-1};
+    if(!Array.isArray(headerRow)) return map;
     headerRow.forEach((cell, idx) => {
       if(!cell) return;
-      const v = String(cell).toLowerCase();
-      if(v.includes('title') || v.includes('name')) map.title = idx;
-      if(v.includes('category') || v.includes('sheet') || v.includes('group')) map.category = idx;
-      if(v.includes('text') || v.includes('content') || v.includes('body')) map.text = idx;
-      if(v.includes('tag')) map.tags = idx;
-      if(v.includes('emoji')) map.emoji = idx;
-      if(v.includes('image') || v.includes('url') || v.includes('img')) map.image = idx;
+      const v = String(cell).toLowerCase().trim();
+      const isImageName = /\b(image[_ ]?name|filename|file[_ ]?name|imagename)\b/.test(v);
+      const isTitle = /\b(title|^name$|subject|headline|heading)\b/.test(v) && !isImageName;
+      const isCategory = /\b(category|sheet|group|bucket|folder)\b/.test(v);
+      const isText = /\b(text|content|body|message|description|note)\b/.test(v);
+      const isTags = /\b(tag|label)\b/.test(v);
+      const isEmoji = /\b(emoji|emoticon|smile|icon)\b/.test(v);
+      const isImage = /\b(image|img|url|src|picture|photo)\b/.test(v) && !isImageName;
+      if(isTitle) map.title = idx;
+      if(isCategory) map.category = idx;
+      if(isText) map.text = idx;
+      if(isTags) map.tags = idx;
+      if(isEmoji) map.emoji = idx;
+      if(isImage) map.image = idx;
     });
     return map;
   }
@@ -2288,8 +2291,8 @@ body.dark .gear-btn{
   safeOn($('btnDeleteSelected'), 'click', ()=> deleteSelected());
   safeOn($('btnEditSelected'), 'click', ()=> { if(window.selectedTiles.length !== 1){ alert('Виберіть один шаблон'); return; } openEditor(window.selectedTiles[0]); });
 
-  // Експорт: читання з localStorage для усіх шаблонів і зображень Base64.
-  safeOn($('btnExportJson'), 'click', ()=>{ try{ const all = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); const data = JSON.stringify(all,null,2); const blob = new Blob([data],{type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='templates.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),1000); }catch(err){ console.error('Export error', err); alert('Не вдалося експортувати JSON'); } });
+  // Експорт: зберігає актуальний масив шаблонів із пам'яті, з fallback на localStorage.
+  safeOn($('btnExportJson'), 'click', ()=>{ try{ const all = Array.isArray(templates) ? templates : JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); const data = JSON.stringify(all,null,2); const blob = new Blob([data],{type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='templates.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),1000); }catch(err){ console.error('Export error', err); alert('Не вдалося експортувати JSON'); } });
 
   // Пошук шаблонів.
   safeOn($('search'), 'input', ()=> {
