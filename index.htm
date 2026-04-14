@@ -902,7 +902,7 @@ body.dark .gear-btn{
         <input id="eImage" type="file" accept="image/*" />
       </div>
       <div class="field-row">
-        <input id="eImageUrl" class="input" placeholder="URL іконки або шлях (наприклад icons/name.png)" />
+        <input id="eImageUrl" class="input" placeholder="URL іконки або шлях (наприклад icon/name.png)" />
       </div>
       <div class="hint">Якщо не завантажуєш файл, можна вказати URL або відносний шлях до іконки зі сховища.</div>
     </div>
@@ -1084,7 +1084,9 @@ body.dark .gear-btn{
     return String(hash);
   }
 
-  /* Нормалізує шлях до іконки: використовує папку icons/ для локальних імен файлів. */
+  const DEFAULT_ICON_FOLDER = 'icon';
+
+  /* Нормалізує шлях до іконки: використовує папку icon/ для локальних імен файлів. */
   function normalizeImagePath(value){
     const image = String(value || '').trim();
     if(!image) return '';
@@ -1093,10 +1095,13 @@ body.dark .gear-btn{
     const path = image.replace(/\\/g,'/').trim();
     const basename = path.split('/').pop();
     if(!basename) return '';
-    return `icons/${basename}`;
+    if(path.startsWith('icon/') || path.startsWith('icons/')){
+      return `${DEFAULT_ICON_FOLDER}/${basename}`;
+    }
+    return `${DEFAULT_ICON_FOLDER}/${basename}`;
   }
 
-  /* Визначає джерело зображення для шаблону: локальний data URL, відносний icons/ шлях або зовнішній URL. */
+  /* Визначає джерело зображення для шаблону: локальний data URL, відносний icon/ шлях або зовнішній URL. */
   function resolveImageSource(item){
     const rawImage = String(item.image || item['Image URL'] || '').trim();
     const imageName = sanitizeText(item.imageName || item['Image Name'] || item['Image Filename'] || '');
