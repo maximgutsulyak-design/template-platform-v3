@@ -1120,7 +1120,7 @@ body.dark .gear-btn{
       text: sanitizeText(item.text || item.Text || item.Content || item.content || ''),
       category: sanitizeText(item.category || item.Category || item.cat || 'Без категорії'),
       tags: parseTags(item.tags || item.Tags || item.TagsList || ''),
-      emoji: (item.emoji || item.Emoji || '').toString().slice(0,4),
+      emoji: Array.from((item.emoji || item.Emoji || '').toString()).slice(0,4).join(''),
       image: (item.image || item['Image URL'] || '').toString().trim(),
       favorite: Boolean(item.favorite || false),
       pinned: Boolean(item.pinned || false),
@@ -2065,7 +2065,7 @@ body.dark .gear-btn{
             const rows = [];
             const keys = Object.keys(parsed[0] || {});
             rows.push(keys);
-            parsed.slice(0,50).forEach(obj => {
+            parsed.slice(0,1000).forEach(obj => {
               rows.push(keys.map(k=>obj[k]||''));
             });
             previewRowsData = rows;
